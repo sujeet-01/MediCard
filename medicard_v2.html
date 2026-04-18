@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MediCard v2 — Digital Health Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#030d18;--bg2:#071422;--bg3:#0b1e35;--bg4:#0f2847;
+  --cyan:#00d4ff;--teal:#00b4a0;--green:#00e676;--red:#ff4560;
+  --amber:#ffab00;--purple:#7c4dff;--pink:#ff4081;
+  --t1:#e8f4fd;--t2:#7fa8c9;--t3:#3d6080;
+  --border:rgba(0,212,255,0.12);--glow:0 0 24px rgba(0,212,255,0.3);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--t1);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-thumb{background:var(--t3);border-radius:4px}
+
+/* BG */
+.bg-grid{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(0,212,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.025) 1px,transparent 1px);background-size:44px 44px}
+.orb{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0}
+.o1{width:600px;height:600px;background:radial-gradient(circle,rgba(0,180,160,.1),transparent);top:-150px;right:-150px;animation:of 9s ease-in-out infinite}
+.o2{width:500px;height:500px;background:radial-gradient(circle,rgba(0,212,255,.07),transparent);bottom:-100px;left:-100px;animation:of 11s ease-in-out infinite reverse}
+@keyframes of{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,-40px)}}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(3,13,24,.88);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.nav-i{max-width:1440px;margin:0 auto;height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 20px}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer}
+.logo-box{width:38px;height:38px;background:linear-gradient(135deg,var(--cyan),var(--teal));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;animation:hb 2s ease-in-out infinite;box-shadow:var(--glow)}
+@keyframes hb{0%,100%{transform:scale(1)}40%{transform:scale(1.08)}70%{transform:scale(1)}}
+.logo-t{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;background:linear-gradient(90deg,var(--cyan),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-s{font-size:9px;color:var(--t3);letter-spacing:2px;text-transform:uppercase}
+.nav-btns{display:flex;gap:6px;align-items:center}
+.nb{padding:7px 16px;border-radius:8px;border:1px solid;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:.5px;transition:all .25s;display:flex;align-items:center;gap:6px;background:transparent}
+.nb.pt{color:var(--cyan);border-color:rgba(0,212,255,.3)}.nb.pt:hover{background:var(--cyan);color:#000}
+.nb.dr{color:var(--teal);border-color:rgba(0,180,160,.3)}.nb.dr:hover{background:var(--teal);color:#000}
+.nb.lb{color:var(--amber);border-color:rgba(255,171,0,.3)}.nb.lb:hover{background:var(--amber);color:#000}
+.nb.lo{color:var(--red);border-color:rgba(255,69,96,.3);display:none}.nb.lo:hover{background:var(--red);color:#fff}
+.nb.em{color:var(--red);border-color:rgba(255,69,96,.5);background:rgba(255,69,96,.1);animation:epulse 1.5s ease-in-out infinite;display:none}
+@keyframes epulse{0%,100%{box-shadow:0 0 0 0 rgba(255,69,96,.4)}50%{box-shadow:0 0 0 6px rgba(255,69,96,0)}}
+.nb.set{color:var(--t2);border-color:rgba(255,255,255,.1);display:none}.nb.set:hover{background:rgba(255,255,255,.05)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:dp 1.5s ease-in-out infinite}
+@keyframes dp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
+
+/* PAGES */
+.page{display:none;position:relative;z-index:1;padding-top:62px;min-height:100vh}
+.page.active{display:block}
+
+/* LANDING */
+#landing{padding-top:0}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 20px 40px;position:relative;overflow:hidden}
+.ecg-wrap{position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);pointer-events:none;opacity:.12}
+.ecg-wrap svg{width:100%;height:70px}
+.ep{stroke:var(--cyan);stroke-width:2;fill:none;stroke-dasharray:3000;stroke-dashoffset:3000;animation:drawE 4s linear infinite}
+@keyframes drawE{to{stroke-dashoffset:-3000}}
+.badge{display:inline-flex;align-items:center;gap:7px;padding:5px 14px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25);border-radius:100px;font-size:11px;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;margin-bottom:28px;animation:fu .5s ease both}
+h1.ht{font-family:'Syne',sans-serif;font-size:clamp(48px,9vw,100px);font-weight:800;line-height:.95;margin-bottom:18px;animation:fu .5s ease .1s both}
+.l1{display:block;color:#fff}.l2{display:block;background:linear-gradient(90deg,var(--cyan),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hsub{font-size:17px;color:var(--t2);max-width:560px;line-height:1.75;margin-bottom:44px;animation:fu .5s ease .2s both}
+.hbtns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;animation:fu .5s ease .3s both}
+.cta{padding:14px 36px;border-radius:12px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-size:16px;font-weight:700;letter-spacing:.8px;transition:all .3s}
+.cta.p{background:linear-gradient(135deg,var(--cyan),var(--teal));color:#000;box-shadow:0 4px 28px rgba(0,212,255,.35)}.cta.p:hover{transform:translateY(-2px);box-shadow:0 8px 36px rgba(0,212,255,.55)}
+.cta.s{background:transparent;color:var(--cyan);border:2px solid rgba(0,212,255,.35)}.cta.s:hover{background:rgba(0,212,255,.08)}
+.cta.amb{background:transparent;color:var(--amber);border:2px solid rgba(255,171,0,.35)}.cta.amb:hover{background:rgba(255,171,0,.08)}
+@keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+.statsbar{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:28px 20px}
+.statsbar-i{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);text-align:center;gap:20px}
+.sn{font-family:'Syne',sans-serif;font-size:34px;font-weight:800;background:linear-gradient(90deg,var(--cyan),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sl{font-size:12px;color:var(--t2);margin-top:3px}
+
+.feat-sec{max-width:1200px;margin:0 auto;padding:72px 20px}
+.sec-t{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;text-align:center;margin-bottom:6px;background:linear-gradient(90deg,var(--cyan),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sec-s{text-align:center;color:var(--t2);margin-bottom:44px;font-size:15px}
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.fc{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:26px;transition:all .3s;cursor:default;position:relative;overflow:hidden}
+.fc::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,212,255,.04),transparent);opacity:0;transition:opacity .3s}
+.fc:hover{transform:translateY(-4px);border-color:rgba(0,212,255,.35);box-shadow:var(--glow)}.fc:hover::after{opacity:1}
+.fi{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px}
+.fc h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:6px}
+.fc p{font-size:13px;color:var(--t2);line-height:1.6}
+
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(3,13,24,.92);backdrop-filter:blur(10px);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
+.mo.active{display:flex}
+.mb{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:36px;width:100%;max-width:500px;position:relative;max-height:92vh;overflow-y:auto;animation:mi .25s ease}
+@keyframes mi{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.mc{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.05);border:none;color:var(--t2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s}.mc:hover{background:rgba(255,69,96,.2);color:var(--red)}
+.mt{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;margin-bottom:3px}
+.ms{font-size:13px;color:var(--t2);margin-bottom:24px}
+.tsw{display:flex;background:rgba(255,255,255,.04);border-radius:10px;padding:3px;margin-bottom:22px;gap:3px}
+.tsb{flex:1;padding:8px;border:none;background:transparent;color:var(--t2);border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s}
+.tsb.active{background:var(--cyan);color:#000}
+.fg2{margin-bottom:14px}
+.fl{display:block;font-size:11px;color:var(--t2);letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px;font-weight:500}
+.fi2{width:100%;padding:11px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:10px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:14px;transition:all .2s;outline:none}
+.fi2:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,212,255,.1)}
+.fi2::placeholder{color:var(--t3)}
+select.fi2 option{background:var(--bg3)}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sb{width:100%;padding:13px;background:linear-gradient(135deg,var(--cyan),var(--teal));border:none;border-radius:10px;color:#000;font-family:'Syne',sans-serif;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:.8px;transition:all .3s;margin-top:6px}
+.sb:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,212,255,.4)}
+.sb.am{background:linear-gradient(135deg,var(--amber),#e65100)}
+.sb.gr{background:linear-gradient(135deg,var(--teal),#006d62)}
+
+/* OTP */
+.otp-wrap{display:flex;gap:10px;justify-content:center;margin:16px 0}
+.otp-box{width:52px;height:56px;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);border-radius:12px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;color:var(--cyan);outline:none;transition:all .2s}
+.otp-box:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,212,255,.15)}
+.otp-sent{text-align:center;font-size:13px;color:var(--t2);margin-bottom:12px}
+.otp-sent span{color:var(--cyan);font-weight:600}
+
+/* DASHBOARD */
+.dash{max-width:1440px;margin:0 auto;padding:22px 20px}
+.dh{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding:18px 22px;background:var(--bg2);border:1px solid var(--border);border-radius:16px;flex-wrap:gap}
+.dw{font-family:'Syne',sans-serif;font-size:24px;font-weight:800}
+.dw span{background:linear-gradient(90deg,var(--cyan),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.drb{padding:5px 14px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+.rb-pt{background:rgba(0,212,255,.12);color:var(--cyan);border:1px solid rgba(0,212,255,.25)}
+.rb-dr{background:rgba(0,180,160,.12);color:var(--teal);border:1px solid rgba(0,180,160,.25)}
+.rb-lb{background:rgba(255,171,0,.12);color:var(--amber);border:1px solid rgba(255,171,0,.25)}
+.vb{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;letter-spacing:.5px}
+.vb.g{background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.2)}
+.vb.b{background:rgba(0,212,255,.1);color:var(--cyan);border:1px solid rgba(0,212,255,.2)}
+
+.dtabs{display:flex;gap:4px;margin-bottom:22px;overflow-x:auto;padding-bottom:4px}
+.dtab{padding:9px 18px;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--t2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:7px}
+.dtab.active{background:var(--bg2);border-color:var(--border);color:var(--t1)}
+.dtab:hover{color:var(--t1);background:rgba(255,255,255,.03)}
+.dc{display:none}.dc.active{display:block}
+
+/* stat cards */
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:22px}
+.sc{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;align-items:center;gap:14px;transition:all .2s}.sc:hover{border-color:rgba(0,212,255,.25)}
+.si{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.snum{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;line-height:1}
+.slb{font-size:11px;color:var(--t2);margin-top:2px}
+
+/* records */
+.rl{display:flex;flex-direction:column;gap:11px}
+.rc{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;transition:all .2s}
+.rc:hover{border-color:rgba(0,212,255,.25);box-shadow:0 4px 18px rgba(0,0,0,.3)}
+.rch{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.rct{font-family:'Syne',sans-serif;font-size:17px;font-weight:700}
+.rcd{font-size:11px;color:var(--t2);font-family:'JetBrains Mono',monospace}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.tag{padding:2px 9px;border-radius:100px;font-size:11px;font-weight:600}
+.ti{background:rgba(255,69,96,.12);color:var(--red);border:1px solid rgba(255,69,96,.2)}
+.ts{background:rgba(255,171,0,.12);color:var(--amber);border:1px solid rgba(255,171,0,.2)}
+.td{background:rgba(0,212,255,.08);color:var(--cyan);border:1px solid rgba(0,212,255,.18)}
+.tl{background:rgba(255,171,0,.08);color:var(--amber);border:1px solid rgba(255,171,0,.18)}
+.rb2{font-size:13px;color:var(--t2);line-height:1.6}.rb2 strong{color:var(--t1)}
+.rx{margin-top:10px;padding:11px;background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.15);border-radius:10px;font-size:12px;color:#80ffbb}
+
+/* profile */
+.pgrid{display:grid;grid-template-columns:280px 1fr;gap:18px}
+.pc{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:center}
+.pav{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--teal));display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 14px;box-shadow:var(--glow)}
+.pn{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:3px}
+.pdet{font-size:12px;color:var(--t2);margin-bottom:6px}
+.pf{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+.fi3{padding:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px}
+.fk{font-size:10px;color:var(--t3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px}
+.fv{font-size:14px;font-weight:500}
+.div{height:1px;background:var(--border);margin:18px 0}
+
+/* search */
+.sp{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:18px}
+.sbar{display:flex;gap:10px}
+.si2{flex:1;padding:11px 18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:10px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:all .2s}
+.si2:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,212,255,.1)}
+.sbtn{padding:11px 26px;background:linear-gradient(135deg,var(--cyan),var(--teal));border:none;border-radius:10px;color:#000;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .3s}.sbtn:hover{box-shadow:var(--glow)}
+
+/* action btns */
+.shdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.shdr h2{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;display:flex;align-items:center;gap:7px}
+.ab{padding:7px 18px;border-radius:8px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25);color:var(--cyan);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+.ab:hover{background:var(--cyan);color:#000}
+.ab.t{background:rgba(0,180,160,.08);border-color:rgba(0,180,160,.25);color:var(--teal)}.ab.t:hover{background:var(--teal);color:#000}
+.ab.a{background:rgba(255,171,0,.08);border-color:rgba(255,171,0,.25);color:var(--amber)}.ab.a:hover{background:var(--amber);color:#000}
+.ab.g{background:rgba(0,230,118,.08);border-color:rgba(0,230,118,.25);color:var(--green)}.ab.g:hover{background:var(--green);color:#000}
+.ab.r{background:rgba(255,69,96,.08);border-color:rgba(255,69,96,.25);color:var(--red)}.ab.r:hover{background:var(--red);color:#fff}
+
+/* drug warning */
+.dw-alert{background:rgba(255,69,96,.06);border:1px solid rgba(255,69,96,.3);border-radius:12px;padding:14px 18px;display:none;align-items:center;gap:12px;margin-bottom:16px;font-size:13px}
+.dw-alert.show{display:flex}
+
+/* EMERGENCY MODE */
+.em-overlay{position:fixed;inset:0;background:rgba(10,0,0,.97);z-index:999;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.em-overlay.active{display:flex}
+.em-header{text-align:center;margin-bottom:32px}
+.em-pulse{width:80px;height:80px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 16px;animation:empulse 1s ease-in-out infinite;box-shadow:0 0 0 0 rgba(255,69,96,.7)}
+@keyframes empulse{0%{box-shadow:0 0 0 0 rgba(255,69,96,.7)}70%{box-shadow:0 0 0 20px rgba(255,69,96,0)}100%{box-shadow:0 0 0 0 rgba(255,69,96,0)}}
+.em-title{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--red);margin-bottom:4px}
+.em-sub{color:var(--t2);font-size:13px}
+.em-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;width:100%;max-width:800px;margin-bottom:24px}
+.em-card{background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);border-radius:16px;padding:22px;text-align:center}
+.em-card.blood{border-color:rgba(255,69,96,.4)}
+.em-card.allergy{border-color:rgba(255,171,0,.4)}
+.em-card.meds{border-color:rgba(0,212,255,.4)}
+.em-card.contact{border-color:rgba(0,230,118,.4)}
+.em-card-icon{font-size:32px;margin-bottom:8px}
+.em-card-label{font-size:10px;color:var(--t2);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.em-card-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:800}
+.em-card.blood .em-card-val{color:var(--red)}
+.em-card.allergy .em-card-val{color:var(--amber);font-size:16px}
+.em-card.meds .em-card-val{color:var(--cyan);font-size:14px}
+.em-card.contact .em-card-val{color:var(--green);font-size:16px}
+.em-close{padding:12px 36px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:var(--t1);cursor:pointer;font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+
+/* PRESCRIPTION SCANNER */
+.scan-zone{border:2px dashed rgba(0,212,255,.3);border-radius:14px;padding:36px;text-align:center;cursor:pointer;transition:all .3s;background:rgba(0,212,255,.02);margin-bottom:16px}
+.scan-zone:hover{border-color:var(--cyan);background:rgba(0,212,255,.05)}
+.scan-result{background:var(--bg3);border:1px solid rgba(0,230,118,.3);border-radius:14px;padding:20px;margin-bottom:16px;display:none}
+.scan-result.active{display:block}
+.scan-field{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px}
+.sf{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px}
+.sfk{font-size:10px;color:var(--t3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px}
+.sfv{font-size:14px;font-weight:600;color:var(--green)}
+
+/* HEALTH TRENDS */
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:18px}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.chart-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700}
+.chart-filters{display:flex;gap:6px}
+.cf{padding:5px 12px;border-radius:100px;border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--t2);font-size:11px;cursor:pointer;transition:all .2s}
+.cf.active{background:var(--cyan);color:#000;border-color:var(--cyan)}
+.chart-wrap{height:200px;position:relative}
+.vitals-input{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:16px;padding:16px;background:rgba(255,255,255,.02);border-radius:12px;border:1px solid var(--border)}
+
+/* CHATBOT */
+.cbot{height:calc(100vh - 220px);min-height:480px;display:flex;flex-direction:column;background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.cbot-h{padding:14px 18px;background:rgba(0,212,255,.06);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.ai-av{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-size:18px}
+.ai-nm{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--cyan)}
+.ai-st{font-size:11px;color:var(--green);display:flex;align-items:center;gap:4px}
+.cbot-msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+.msg{max-width:75%;display:flex;flex-direction:column}
+.msg.u{align-self:flex-end;align-items:flex-end}.msg.a{align-self:flex-start}
+.mb2{padding:11px 15px;border-radius:14px;font-size:13px;line-height:1.65}
+.msg.u .mb2{background:linear-gradient(135deg,rgba(0,212,255,.18),rgba(0,180,160,.18));border:1px solid rgba(0,212,255,.18)}
+.msg.a .mb2{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.mt2{font-size:10px;color:var(--t3);margin-top:3px;font-family:'JetBrains Mono',monospace}
+.cbot-inp{padding:14px;border-top:1px solid var(--border);display:flex;gap:8px}
+.ci{flex:1;padding:11px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:12px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none;max-height:90px;transition:all .2s}
+.ci:focus{border-color:var(--cyan)}
+.csend{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,var(--cyan),var(--teal));border:none;color:#000;cursor:pointer;font-size:16px;flex-shrink:0;transition:all .2s}.csend:hover{transform:scale(1.05);box-shadow:var(--glow)}
+.csugs{display:flex;gap:7px;flex-wrap:wrap;padding:7px 14px;border-top:1px solid var(--border)}
+.csug{padding:5px 11px;border-radius:100px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.18);color:var(--cyan);font-size:11px;cursor:pointer;transition:all .2s;white-space:nowrap}.csug:hover{background:rgba(0,212,255,.14)}
+.tdots span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--t2);margin:0 2px;animation:td 1.2s ease-in-out infinite}
+.tdots span:nth-child(2){animation-delay:.2s}.tdots span:nth-child(3){animation-delay:.4s}
+@keyframes td{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+
+/* DOCTOR TEMPLATES */
+.templ-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:18px}
+.templ-btn{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:all .2s}
+.templ-btn:hover{border-color:rgba(0,180,160,.4);background:rgba(0,180,160,.06)}
+.templ-btn .ti2{font-size:26px;margin-bottom:6px}
+.templ-btn h4{font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
+.templ-btn p{font-size:11px;color:var(--t2);margin-top:2px}
+
+/* PATIENT INSIGHTS */
+.insights-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:18px}
+.insight-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px}
+.ic-title{font-size:12px;color:var(--t2);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px}
+.ic-item{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+.ic-item:last-child{border-bottom:none}
+.ic-count{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--cyan);background:rgba(0,212,255,.1);padding:2px 8px;border-radius:6px}
+.risk-flag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:700}
+.rf-high{background:rgba(255,69,96,.15);color:var(--red)}
+.rf-med{background:rgba(255,171,0,.15);color:var(--amber)}
+.rf-low{background:rgba(0,230,118,.15);color:var(--green)}
+
+/* AI SUGGEST */
+.ai-suggest{background:rgba(124,77,255,.06);border:1px solid rgba(124,77,255,.2);border-radius:12px;padding:16px;margin-bottom:14px;display:none}
+.ai-suggest.show{display:block}
+.ai-suggest-title{font-size:12px;color:var(--purple);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ai-suggest-items{display:flex;flex-wrap:wrap;gap:8px}
+.asi{padding:6px 14px;border-radius:100px;background:rgba(124,77,255,.12);border:1px solid rgba(124,77,255,.25);color:#b39ddb;font-size:12px;cursor:pointer;transition:all .2s}
+.asi:hover{background:rgba(124,77,255,.2)}
+
+/* WHATSAPP */
+.wa-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);border-radius:10px;color:#25D366;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none}
+.wa-btn:hover{background:rgba(37,211,102,.18);border-color:#25D366}
+
+/* TEMP ACCESS */
+.ta-card{background:rgba(124,77,255,.06);border:1px solid rgba(124,77,255,.2);border-radius:14px;padding:20px;margin-bottom:14px}
+.ta-token{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;letter-spacing:3px;color:var(--purple);background:rgba(124,77,255,.1);padding:10px 20px;border-radius:10px;display:inline-block;margin:10px 0}
+.ta-exp{font-size:12px;color:var(--amber)}
+
+/* CHRONIC DISEASE */
+.cd-tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.cd-tab{padding:8px 18px;border-radius:100px;border:1px solid;background:transparent;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s}
+.cd-tab.diab{color:var(--amber);border-color:rgba(255,171,0,.3)}.cd-tab.diab.active{background:var(--amber);color:#000}
+.cd-tab.heart{color:var(--red);border-color:rgba(255,69,96,.3)}.cd-tab.heart.active{background:var(--red);color:#fff}
+.cd-tab.asth{color:var(--cyan);border-color:rgba(0,212,255,.3)}.cd-tab.asth.active{background:var(--cyan);color:#000}
+.cd-content{display:none}.cd-content.active{display:block}
+.cd-metric{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center}
+.cd-metric .val{font-family:'Syne',sans-serif;font-size:42px;font-weight:800}
+.cd-metric .unit{font-size:13px;color:var(--t2)}
+.cd-metric .status{margin-top:8px;font-size:12px;font-weight:600}
+
+/* UPLOAD */
+.uz{border:2px dashed rgba(0,212,255,.25);border-radius:14px;padding:32px;text-align:center;cursor:pointer;transition:all .3s;background:rgba(0,212,255,.02)}
+.uz:hover{border-color:var(--cyan);background:rgba(0,212,255,.04)}
+.uz h3{font-family:'Syne',sans-serif;font-size:17px;margin-bottom:5px}
+
+/* APPT */
+.ag{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.ac{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;transition:all .2s}.ac:hover{border-color:rgba(0,212,255,.25)}
+.at{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cyan);margin-bottom:5px}
+.adn{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:3px}
+.as{display:inline-block;padding:3px 9px;border-radius:100px;font-size:10px;font-weight:700}
+.sc2{background:rgba(0,230,118,.12);color:var(--green)}.sp2{background:rgba(255,171,0,.12);color:var(--amber)}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--bg3);border:1px solid;border-radius:12px;padding:12px 18px;display:flex;align-items:center;gap:9px;z-index:999;transform:translateX(200px);opacity:0;transition:all .35s;font-size:13px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.toast.show{transform:translateX(0);opacity:1}
+.toast.s{border-color:rgba(0,230,118,.35);color:var(--green)}
+.toast.e{border-color:rgba(255,69,96,.35);color:var(--red)}
+.toast.i{border-color:rgba(0,212,255,.35);color:var(--cyan)}
+
+/* SETTINGS */
+.set-group{margin-bottom:20px}
+.set-label{font-size:12px;color:var(--t2);margin-bottom:6px;font-weight:500}
+.set-input{width:100%;padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:10px;color:var(--t1);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none}
+.set-input:focus{border-color:var(--cyan)}
+.set-note{font-size:11px;color:var(--t3);margin-top:5px}
+.set-save{padding:10px 24px;background:linear-gradient(135deg,var(--cyan),var(--teal));border:none;border-radius:8px;color:#000;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer}
+
+/* EXPORT */
+.export-opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.exp-card{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;cursor:pointer;transition:all .2s}
+.exp-card:hover{border-color:rgba(0,212,255,.3);transform:translateY(-2px)}
+.exp-icon{font-size:36px;margin-bottom:10px}
+.exp-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px}
+.exp-desc{font-size:12px;color:var(--t2)}
+
+/* AI HEALTH SUMMARY */
+.ai-summary{background:linear-gradient(135deg,rgba(124,77,255,.08),rgba(0,212,255,.05));border:1px solid rgba(124,77,255,.2);border-radius:16px;padding:24px;position:relative;overflow:hidden}
+.ai-summary::before{content:'🤖';position:absolute;top:-10px;right:20px;font-size:80px;opacity:.05}
+.ais-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--purple);margin-bottom:4px}
+.ais-body{font-size:14px;color:var(--t2);line-height:1.7}
+.ais-gen{padding:10px 22px;background:linear-gradient(135deg,var(--purple),#4527a0);border:none;border-radius:8px;color:#fff;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:14px;transition:all .2s}.ais-gen:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(124,77,255,.4)}
+
+/* PRINT */
+@media print{nav,.dtabs,.ab,button,.orb,.bg-grid,#emergency-btn{display:none!important}.page{padding-top:0!important}body{background:#fff;color:#000}}
+
+/* MOBILE */
+@media(max-width:768px){.pgrid{grid-template-columns:1fr}.fr{grid-template-columns:1fr}.statsbar-i{grid-template-columns:repeat(2,1fr)}.hbtns{flex-direction:column;align-items:center}.nb span.lbl{display:none}.ag{grid-template-columns:1fr}.scan-field{grid-template-columns:1fr}}
+
+input[type=file]{display:none}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-i">
+    <div class="logo" onclick="goLanding()">
+      <div class="logo-box">⚕️</div>
+      <div><div class="logo-t">MediCard</div><div class="logo-s">Digital Health Platform</div></div>
+    </div>
+    <div class="nav-btns">
+      <button class="nb pt" id="nPt" onclick="openModal('pt')"><span class="dot"></span><span class="lbl">Patient</span></button>
+      <button class="nb dr" id="nDr" onclick="openModal('dr')"><span class="dot"></span><span class="lbl">Doctor</span></button>
+      <button class="nb lb" id="nLb" onclick="openModal('lb')"><span class="dot"></span><span class="lbl">Lab</span></button>
+      <button class="nb em" id="nEm" onclick="showEmergency()">🆘 Emergency</button>
+      <button class="nb set" id="nSet" onclick="openModal('set')">⚙️</button>
+      <button class="nb lo" id="nLo" onclick="logout()">⏻ Logout</button>
+    </div>
+  </div>
+</nav>
+
+<!-- EMERGENCY OVERLAY -->
+<div class="em-overlay" id="emOverlay">
+  <div class="em-header">
+    <div class="em-pulse">🆘</div>
+    <div class="em-title">EMERGENCY ACCESS</div>
+    <div class="em-sub">Critical patient information — accessible without login</div>
+  </div>
+  <div class="em-cards">
+    <div class="em-card blood"><div class="em-card-icon">🩸</div><div class="em-card-label">Blood Group</div><div class="em-card-val" id="em-blood">—</div></div>
+    <div class="em-card allergy"><div class="em-card-icon">⚠️</div><div class="em-card-label">Allergies</div><div class="em-card-val" id="em-allergy">—</div></div>
+    <div class="em-card meds"><div class="em-card-icon">💊</div><div class="em-card-label">Current Medicines</div><div class="em-card-val" id="em-meds">—</div></div>
+    <div class="em-card contact"><div class="em-card-icon">📞</div><div class="em-card-label">Emergency Contact</div><div class="em-card-val" id="em-contact">—</div></div>
+  </div>
+  <button class="em-close" onclick="closeEmergency()">Close Emergency View</button>
+</div>
+
+<!-- ── PAGES ── -->
+<!-- LANDING -->
+<div id="landing" class="page active">
+  <div class="hero">
+    <div class="ecg-wrap"><svg viewBox="0 0 1400 70" preserveAspectRatio="none"><path class="ep" d="M0,35 L120,35 L140,35 L160,5 L180,65 L200,35 L220,35 L340,35 L360,35 L380,5 L400,65 L420,35 L440,35 L560,35 L580,35 L600,5 L620,65 L640,35 L660,35 L780,35 L800,35 L820,5 L840,65 L860,35 L880,35 L1000,35 L1020,35 L1040,5 L1060,65 L1080,35 L1100,35 L1220,35 L1240,35 L1260,5 L1280,65 L1300,35 L1400,35"/></svg></div>
+    <div class="badge">🛡️ OTP Verified · Secure · AI-Powered</div>
+    <h1 class="ht"><span class="l1">Your Medical</span><span class="l2">Passport</span></h1>
+    <p class="hsub">One platform for patients, doctors & labs. AI-powered health records, emergency access, prescription scanning, and intelligent health insights — all in one place.</p>
+    <div class="hbtns">
+      <button class="cta p" onclick="openModal('pt')">👤 I'm a Patient</button>
+      <button class="cta s" onclick="openModal('dr')">👨‍⚕️ I'm a Doctor</button>
+      <button class="cta amb" onclick="openModal('lb')">🔬 I'm a Lab</button>
+    </div>
+  </div>
+  <div class="statsbar"><div class="statsbar-i">
+    <div><div class="sn">1.4M+</div><div class="sl">Patients</div></div>
+    <div><div class="sn">8K+</div><div class="sl">Doctors</div></div>
+    <div><div class="sn">1K+</div><div class="sl">Certified Labs</div></div>
+    <div><div class="sn">99.9%</div><div class="sl">Uptime</div></div>
+  </div></div>
+  <div class="feat-sec">
+    <div class="sec-t">Packed with Intelligence</div>
+    <div class="sec-s">From AI prescription scanning to emergency life-saving cards</div>
+    <div class="fg">
+      <div class="fc"><div class="fi" style="background:rgba(255,69,96,.12)">📸</div><h3>AI Prescription Scanner</h3><p>Upload photo of handwritten prescription — AI extracts medicine, dosage & date automatically.</p></div>
+      <div class="fc"><div class="fi" style="background:rgba(255,69,96,.15)">🆘</div><h3>Emergency Mode</h3><p>One-tap emergency card shows blood group, allergies, medicines & emergency contact — even to strangers.</p></div>
+      <div class="fc"><div class="fi" style="background:rgba(0,212,255,.12)">⚡</div><h3>30-Second Visit Entry</h3><p>Doctors use smart templates for Fever, Flu, Diabetes — auto-fills medicines, saving precious clinic time.</p></div>
+      <div class="fc"><div class="fi" style="background:rgba(124,77,255,.12)">🧠</div><h3>AI Health Assistant</h3><p>Gemini AI reads YOUR records and gives personalized health guidance, report interpretation & summaries.</p></div>
+      <div class="fc"><div class="fi" style="background:rgba(0,230,118,.12)">📈</div><h3>Health Trends</h3><p>Track BP, sugar, and weight over time with beautiful charts. See your health story visually.</p></div>
+      <div class="fc"><div class="fi" style="background:rgba(255,171,0,.12)">⚠️</div><h3>Drug Interaction Warning</h3><p>Alerts doctor immediately if a new prescription conflicts with patient's existing medications.</p></div>
+      <div class="fc"><div class="fi" style="background:rgba(37,211,102,.12)">📲</div><h3>WhatsApp Sharing</h3><p>Share prescriptions, reports & reminders directly via WhatsApp — India's most used app.</p></div>
+      <div class="fc"><div class="fi" style="background:rgba(0,180,160,.12)">🔐</div><h3>Temporary Access</h3><p>Give a doctor 24-hour access to your records. Auto-revokes. Full privacy control in your hands.</p></div>
+      <div class="fc"><div class="fi" style="background:rgba(124,77,255,.12)">🧬</div><h3>Chronic Disease Mode</h3><p>Dedicated dashboards for Diabetes, Heart patients & Asthma with relevant metrics and tracking.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- PATIENT DASHBOARD -->
+<div id="pt-dash" class="page">
+  <div class="dash">
+    <div class="dh">
+      <div><div class="dw">Welcome, <span id="ptN">Patient</span></div><div style="font-size:12px;color:var(--t2);margin-top:3px">📱 <span id="ptPh"></span></div></div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div class="drb rb-pt">Patient</div>
+        <div class="vb g">✓ OTP Verified</div>
+        <button class="ab r" onclick="showEmergency()">🆘 Emergency</button>
+      </div>
+    </div>
+    <div class="dtabs">
+      <button class="dtab active" onclick="pTab('ov',this)">📊 Overview</button>
+      <button class="dtab" onclick="pTab('hist',this)">🏥 History</button>
+      <button class="dtab" onclick="pTab('scan',this)">📸 Rx Scanner</button>
+      <button class="dtab" onclick="pTab('trends',this)">📈 Health Trends</button>
+      <button class="dtab" onclick="pTab('chronic',this)">🧬 Chronic Mode</button>
+      <button class="dtab" onclick="pTab('labs',this)">🔬 Lab Reports</button>
+      <button class="dtab" onclick="pTab('appt',this)">📅 Appointments</button>
+      <button class="dtab" onclick="pTab('docs',this)">👨‍⚕️ My Doctors</button>
+      <button class="dtab" onclick="pTab('share',this)">🔐 Access Sharing</button>
+      <button class="dtab" onclick="pTab('ai',this)">🤖 MediBot</button>
+      <button class="dtab" onclick="pTab('prof',this)">👤 Profile</button>
+      <button class="dtab" onclick="pTab('export',this)">📄 Export</button>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div class="dc active" id="pt-ov">
+      <div class="sg">
+        <div class="sc"><div class="si" style="background:rgba(255,69,96,.12)">🏥</div><div><div class="snum" style="color:var(--red)" id="ov1">0</div><div class="slb">Visits</div></div></div>
+        <div class="sc"><div class="si" style="background:rgba(0,212,255,.12)">👨‍⚕️</div><div><div class="snum" style="color:var(--cyan)" id="ov2">0</div><div class="slb">Doctors</div></div></div>
+        <div class="sc"><div class="si" style="background:rgba(255,171,0,.12)">🔬</div><div><div class="snum" style="color:var(--amber)" id="ov3">0</div><div class="slb">Lab Reports</div></div></div>
+        <div class="sc"><div class="si" style="background:rgba(0,230,118,.12)">📅</div><div><div class="snum" style="color:var(--green)" id="ov4">0</div><div class="slb">Appointments</div></div></div>
+      </div>
+      <div class="ai-summary" id="aiSummaryCard">
+        <div class="ais-title">🤖 AI Health Summary</div>
+        <div class="ais-body" id="aiSummaryText">Click "Generate Summary" to get a personalized AI analysis of your health history.</div>
+        <button class="ais-gen" onclick="generateAISummary()">✨ Generate My Summary</button>
+      </div>
+      <div class="shdr" style="margin-top:18px"><h2>📌 Recent Visits</h2></div>
+      <div class="rl" id="pt-recent"></div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="dc" id="pt-hist">
+      <div class="shdr"><h2>🏥 Medical History</h2><button class="wa-btn" onclick="shareViaWhatsApp('history')">📲 Share via WhatsApp</button></div>
+      <div class="rl" id="pt-hist-list"></div>
+    </div>
+
+    <!-- PRESCRIPTION SCANNER -->
+    <div class="dc" id="pt-scan">
+      <div class="shdr"><h2>📸 AI Prescription Scanner</h2></div>
+      <div style="background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.15);border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:var(--t2)">
+        📌 Upload a photo of any handwritten or printed prescription. AI will extract medicine names, dosages, and dates automatically.
+      </div>
+      <div class="scan-zone" onclick="document.getElementById('rxFile').click()">
+        <div style="font-size:48px;margin-bottom:10px">📷</div>
+        <h3>Upload Prescription Photo</h3>
+        <p style="color:var(--t2);font-size:13px;margin-top:4px">JPG, PNG — handwritten or printed</p>
+        <input type="file" id="rxFile" accept=".jpg,.jpeg,.png" onchange="scanPrescription(event)">
+      </div>
+      <div class="scan-result" id="scanResult">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <div style="width:38px;height:38px;border-radius:10px;background:rgba(0,230,118,.15);display:flex;align-items:center;justify-content:center;font-size:18px">✅</div>
+          <div><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--green)">Prescription Scanned Successfully</div><div style="font-size:12px;color:var(--t2)">AI extracted the following information</div></div>
+        </div>
+        <div class="scan-field" id="scanFields"></div>
+        <button class="ab g" style="margin-top:14px" onclick="saveScanToRecord()">✅ Save to Medical Records</button>
+        <button class="wa-btn" style="margin-top:10px;margin-left:10px" onclick="shareViaWhatsApp('prescription')">📲 Share via WhatsApp</button>
+      </div>
+    </div>
+
+    <!-- HEALTH TRENDS -->
+    <div class="dc" id="pt-trends">
+      <div class="shdr"><h2>📈 Health Trends</h2></div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Blood Pressure (mmHg)</div>
+          <div class="chart-filters">
+            <button class="cf active">Week</button><button class="cf">Month</button><button class="cf">Year</button>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="bpChart"></canvas></div>
+        <div class="vitals-input">
+          <div><div class="fk">SYSTOLIC</div><input class="fi2" type="number" id="vSys" placeholder="120"></div>
+          <div><div class="fk">DIASTOLIC</div><input class="fi2" type="number" id="vDia" placeholder="80"></div>
+          <button class="ab" style="align-self:flex-end" onclick="addVital('bp')">+ Log BP</button>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header"><div class="chart-title">Blood Sugar (mg/dL)</div></div>
+        <div class="chart-wrap"><canvas id="sugarChart"></canvas></div>
+        <div class="vitals-input">
+          <div><div class="fk">FASTING</div><input class="fi2" type="number" id="vSugar" placeholder="90"></div>
+          <div><div class="fk">TYPE</div><select class="fi2" id="vSugarType"><option>Fasting</option><option>Post-meal</option><option>Random</option></select></div>
+          <button class="ab" style="align-self:flex-end" onclick="addVital('sugar')">+ Log Sugar</button>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header"><div class="chart-title">Weight (kg)</div></div>
+        <div class="chart-wrap"><canvas id="weightChart"></canvas></div>
+        <div class="vitals-input">
+          <div><div class="fk">WEIGHT (KG)</div><input class="fi2" type="number" id="vWeight" placeholder="70"></div>
+          <div></div>
+          <button class="ab" style="align-self:flex-end" onclick="addVital('weight')">+ Log Weight</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHRONIC DISEASE -->
+    <div class="dc" id="pt-chronic">
+      <div class="shdr"><h2>🧬 Chronic Disease Mode</h2></div>
+      <div class="cd-tabs">
+        <button class="cd-tab diab active" onclick="cdTab('diab',this)">💉 Diabetes</button>
+        <button class="cd-tab heart" onclick="cdTab('heart',this)">❤️ Heart</button>
+        <button class="cd-tab asth" onclick="cdTab('asth',this)">🫁 Asthma</button>
+      </div>
+      <div class="cd-content active" id="cd-diab">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:16px">
+          <div class="cd-metric"><div class="em-card-icon">🩸</div><div class="val" style="color:var(--amber)" id="cd-sugar-val">—</div><div class="unit">mg/dL last reading</div><div class="status" id="cd-sugar-status" style="color:var(--t2)">Log your sugar to see status</div></div>
+          <div class="cd-metric"><div class="em-card-icon">📊</div><div class="val" style="color:var(--cyan)" id="cd-hba1c">—</div><div class="unit">HbA1c target</div><div class="status" style="color:var(--green)">Keep below 7%</div></div>
+          <div class="cd-metric"><div class="em-card-icon">🥗</div><div class="val" style="color:var(--green)">3x</div><div class="unit">meals/day</div><div class="status" style="color:var(--t2)">Regular meal schedule</div></div>
+        </div>
+        <div style="background:rgba(255,171,0,.05);border:1px solid rgba(255,171,0,.2);border-radius:12px;padding:16px;font-size:13px;color:var(--t2);line-height:1.7">
+          <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--amber);margin-bottom:8px">💡 Diabetes Management Tips</div>
+          ✅ Check blood sugar fasting every morning<br>✅ Avoid refined carbs and sugary drinks<br>✅ Walk 30 minutes daily<br>✅ Never skip meals — leads to hypoglycemia<br>✅ Keep fast-acting glucose (candy/juice) handy
+        </div>
+      </div>
+      <div class="cd-content" id="cd-heart">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:16px">
+          <div class="cd-metric"><div class="em-card-icon">💓</div><div class="val" style="color:var(--red)" id="cd-bp-val">—</div><div class="unit">mmHg last BP</div><div class="status" id="cd-bp-status" style="color:var(--t2)">Log BP to see status</div></div>
+          <div class="cd-metric"><div class="em-card-icon">🧂</div><div class="val" style="color:var(--amber)">Low</div><div class="unit">salt intake target</div><div class="status" style="color:var(--green)">Under 5g/day</div></div>
+          <div class="cd-metric"><div class="em-card-icon">🚶</div><div class="val" style="color:var(--cyan)">30m</div><div class="unit">daily walk target</div><div class="status" style="color:var(--green)">Light cardio daily</div></div>
+        </div>
+        <div style="background:rgba(255,69,96,.05);border:1px solid rgba(255,69,96,.2);border-radius:12px;padding:16px;font-size:13px;color:var(--t2);line-height:1.7">
+          <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--red);margin-bottom:8px">💡 Heart Health Tips</div>
+          ✅ Monitor BP twice daily — morning & evening<br>✅ Reduce sodium — avoid processed foods<br>✅ Take prescribed medications without missing doses<br>✅ Avoid stress and practice breathing exercises<br>⚠️ Chest pain + shortness of breath = call emergency immediately
+        </div>
+      </div>
+      <div class="cd-content" id="cd-asth">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:16px">
+          <div class="cd-metric"><div class="em-card-icon">🫁</div><div class="val" style="color:var(--cyan)">Keep</div><div class="unit">inhaler accessible</div><div class="status" style="color:var(--amber)">Always carry rescue inhaler</div></div>
+          <div class="cd-metric"><div class="em-card-icon">🌡️</div><div class="val" style="color:var(--green)">AQI</div><div class="unit">monitor air quality</div><div class="status" style="color:var(--t2)">Avoid going out on bad AQI days</div></div>
+        </div>
+        <div style="background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.2);border-radius:12px;padding:16px;font-size:13px;color:var(--t2);line-height:1.7">
+          <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--cyan);margin-bottom:8px">💡 Asthma Management Tips</div>
+          ✅ Always carry rescue inhaler<br>✅ Avoid dust, pollen, smoke and strong perfumes<br>✅ Know your triggers and avoid them<br>✅ Use peak flow meter daily if recommended<br>⚠️ Severe breathlessness = emergency — don't delay
+        </div>
+      </div>
+    </div>
+
+    <!-- LAB REPORTS -->
+    <div class="dc" id="pt-labs">
+      <div class="shdr"><h2>🔬 Lab Reports</h2></div>
+      <div id="pt-labs-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px"></div>
+      <div style="color:var(--t2);font-size:13px" id="pt-labs-empty">No lab reports yet. Reports uploaded by certified labs appear here.</div>
+    </div>
+
+    <!-- APPOINTMENTS -->
+    <div class="dc" id="pt-appt">
+      <div class="shdr"><h2>📅 Appointments</h2><button class="ab" onclick="toggleEl('bookForm')">+ Book Appointment</button></div>
+      <div id="bookForm" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px">
+        <div class="fr"><div class="fg2"><label class="fl">Doctor Name</label><input class="fi2" id="ap-doc" placeholder="Dr. Name"></div><div class="fg2"><label class="fl">Specialization</label><input class="fi2" id="ap-sp" placeholder="Cardiologist..."></div></div>
+        <div class="fr"><div class="fg2"><label class="fl">Hospital</label><input class="fi2" id="ap-ho" placeholder="Hospital/Clinic"></div><div class="fg2"><label class="fl">Date & Time</label><input class="fi2" type="datetime-local" id="ap-dt"></div></div>
+        <div class="fg2"><label class="fl">Reason</label><input class="fi2" id="ap-re" placeholder="Follow-up, symptoms..."></div>
+        <button class="sb" style="margin-top:10px;padding:11px" onclick="bookAppt()">Confirm Booking</button>
+      </div>
+      <div class="ag" id="pt-appt-list"></div>
+      <div style="color:var(--t2);font-size:13px" id="pt-appt-empty">No appointments booked.</div>
+    </div>
+
+    <!-- MY DOCTORS -->
+    <div class="dc" id="pt-docs">
+      <div class="shdr"><h2>👨‍⚕️ My Doctors</h2></div>
+      <div id="pt-docs-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px"></div>
+      <div style="color:var(--t2);font-size:13px" id="pt-docs-empty">No doctors yet.</div>
+    </div>
+
+    <!-- TEMP ACCESS SHARING -->
+    <div class="dc" id="pt-share">
+      <div class="shdr"><h2>🔐 Temporary Access Sharing</h2></div>
+      <div style="background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.15);border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:var(--t2)">
+        Generate a one-time access token to share your full medical records with any doctor. Token expires in 24 hours and is automatically revoked.
+      </div>
+      <div class="ta-card" id="taCard" style="display:none">
+        <div style="font-size:14px;margin-bottom:6px">Active Access Token</div>
+        <div class="ta-token" id="taToken"></div>
+        <div class="ta-exp" id="taExp"></div>
+        <div style="display:flex;gap:10px;margin-top:12px">
+          <button class="wa-btn" onclick="shareTokenWhatsApp()">📲 Share Token via WhatsApp</button>
+          <button class="ab r" onclick="revokeToken()">🚫 Revoke Access</button>
+        </div>
+      </div>
+      <button class="sb" style="padding:12px 28px;max-width:240px" onclick="generateToken()">🔑 Generate Access Token</button>
+      <div class="div"></div>
+      <div class="shdr"><h2>Active Shared Access</h2></div>
+      <div id="sharedAccessList" style="color:var(--t2);font-size:13px">No active shared access.</div>
+    </div>
+
+    <!-- MEDIBOT AI -->
+    <div class="dc" id="pt-ai">
+      <div class="cbot">
+        <div class="cbot-h">
+          <div class="ai-av">🤖</div>
+          <div><div class="ai-nm">MediBot — Gemini AI</div><div class="ai-st"><span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block"></span> Online · Reading your records</div></div>
+          <div style="margin-left:auto;font-size:11px;color:var(--t2)">Powered by Google Gemini</div>
+        </div>
+        <div class="cbot-msgs" id="chatMsgs">
+          <div class="msg a"><div class="mb2">👋 Hi! I'm <strong>MediBot</strong>, powered by Google Gemini. I have access to your full medical history and can answer personalized health questions.<br><br>⚙️ Add your <strong>Gemini API key</strong> in Settings (⚙️) for live AI responses.<br><br>⚠️ <em>I provide guidance only — always consult your doctor for medical decisions.</em></div><div class="mt2">Just now</div></div>
+        </div>
+        <div class="csugs">
+          <button class="csug" onclick="sendSug('Summarize my health history')">📋 Health Summary</button>
+          <button class="csug" onclick="sendSug('What are my current medications?')">💊 My Medications</button>
+          <button class="csug" onclick="sendSug('Any drug interactions I should know about?')">⚠️ Drug Interactions</button>
+          <button class="csug" onclick="sendSug('When is my next follow-up?')">📅 Follow-ups</button>
+          <button class="csug" onclick="sendSug('What do my latest lab reports indicate?')">🔬 Lab Reports</button>
+          <button class="csug" onclick="sendSug('Give me diet and lifestyle tips based on my conditions')">🥗 Lifestyle Tips</button>
+        </div>
+        <div class="cbot-inp">
+          <textarea class="ci" id="chatIn" placeholder="Ask about your health, reports, medications..." rows="1" onkeydown="chatKey(event)"></textarea>
+          <button class="csend" onclick="sendChat()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="dc" id="pt-prof">
+      <div class="pgrid">
+        <div class="pc">
+          <div class="pav">👤</div>
+          <div class="pn" id="pp-name">Name</div>
+          <div class="pdet" id="pp-ph">📱</div>
+          <div class="pdet" id="pp-city">📍</div>
+          <div style="margin-top:10px"><div class="vb g">✓ OTP Verified</div></div>
+          <div class="div"></div>
+          <div style="background:rgba(255,69,96,.08);border:1px solid rgba(255,69,96,.18);border-radius:10px;padding:12px">
+            <div class="fk">BLOOD GROUP</div>
+            <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--red)" id="pp-blood">—</div>
+          </div>
+        </div>
+        <div class="pf"><h3 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:14px">Personal Information</h3><div class="fgrid" id="pp-fields"></div></div>
+      </div>
+    </div>
+
+    <!-- EXPORT -->
+    <div class="dc" id="pt-export">
+      <div class="shdr"><h2>📄 Export Health Records</h2></div>
+      <div style="background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.15);border-radius:12px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:var(--t2)">Export your complete health records as a PDF document. Useful for insurance claims, hospital admissions, and transferring to new doctors.</div>
+      <div class="export-opts">
+        <div class="exp-card" onclick="exportPDF()"><div class="exp-icon">📄</div><div class="exp-name">Full Medical Report</div><div class="exp-desc">All visits, prescriptions, lab reports</div></div>
+        <div class="exp-card" onclick="shareViaWhatsApp('full')"><div class="exp-icon">📲</div><div class="exp-name">Share via WhatsApp</div><div class="exp-desc">Send summary to anyone instantly</div></div>
+        <div class="exp-card" onclick="exportPDF('emergency')"><div class="exp-icon">🆘</div><div class="exp-name">Emergency Card</div><div class="exp-desc">Blood group, allergies, emergency contacts</div></div>
+        <div class="exp-card" onclick="exportPDF('prescriptions')"><div class="exp-icon">💊</div><div class="exp-name">Prescriptions Only</div><div class="exp-desc">All past prescriptions in one document</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DOCTOR DASHBOARD -->
+<div id="dr-dash" class="page">
+  <div class="dash">
+    <div class="dh">
+      <div><div class="dw">Dr. <span id="drN">Doctor</span></div><div style="font-size:12px;color:var(--t2);margin-top:3px" id="drSp"></div></div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <div class="drb rb-dr">Doctor</div>
+        <div class="vb g">✓ Medically Verified</div>
+      </div>
+    </div>
+    <div class="dtabs">
+      <button class="dtab active" onclick="dTab('search',this)">🔍 Patient Search</button>
+      <button class="dtab" onclick="dTab('insights',this)">📊 Patient Insights</button>
+      <button class="dtab" onclick="dTab('appts',this)">📅 Appointments</button>
+      <button class="dtab" onclick="dTab('prof',this)">👤 My Profile</button>
+    </div>
+
+    <!-- PATIENT SEARCH -->
+    <div class="dc active" id="dr-search">
+      <div style="background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.15);border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:var(--t2)">🔍 Search patients by <strong style="color:var(--cyan)">Phone Number</strong> to instantly access their full medical profile and add records.</div>
+      <div class="sp"><div class="sbar"><input class="si2" id="drSrch" placeholder="Enter patient phone number..." type="tel"><button class="sbtn" onclick="drSearch()">🔍 Search</button></div></div>
+      <!-- TEMP TOKEN ACCESS -->
+      <div style="background:rgba(124,77,255,.06);border:1px solid rgba(124,77,255,.2);border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:var(--t2)">🔐 Or enter a <strong style="color:var(--purple)">Temporary Access Token</strong> shared by a patient:</div>
+      <div class="sp" style="margin-bottom:0"><div class="sbar"><input class="si2" id="drToken" placeholder="Enter 8-digit access token..." type="text"><button class="sbtn" style="background:linear-gradient(135deg,var(--purple),#4527a0)" onclick="drTokenSearch()">🔑 Use Token</button></div></div>
+      <div id="drResult" style="margin-top:16px"></div>
+    </div>
+
+    <!-- PATIENT INSIGHTS -->
+    <div class="dc" id="dr-insights">
+      <div class="shdr"><h2>📊 Patient Insights</h2></div>
+      <div style="color:var(--t2);font-size:13px;margin-bottom:14px">Search a patient first to see their health insights and risk flags.</div>
+      <div id="drInsights"></div>
+    </div>
+
+    <!-- DR APPOINTMENTS -->
+    <div class="dc" id="dr-appts">
+      <div class="shdr"><h2>📅 Upcoming Appointments</h2></div>
+      <div class="ag" id="dr-appts-list"></div>
+      <div style="color:var(--t2);font-size:13px" id="dr-appts-empty">No upcoming appointments.</div>
+    </div>
+
+    <!-- DR PROFILE -->
+    <div class="dc" id="dr-prof">
+      <div class="pgrid">
+        <div class="pc">
+          <div class="pav" style="background:linear-gradient(135deg,var(--teal),var(--cyan))">👨‍⚕️</div>
+          <div class="pn" id="dp-name"></div>
+          <div class="pdet" id="dp-spec" style="color:var(--teal)"></div>
+          <div class="pdet" id="dp-hosp"></div>
+          <div style="margin-top:10px"><div class="vb b">✓ Medical Council Verified</div></div>
+          <div class="div"></div>
+          <div style="background:rgba(0,180,160,.08);border:1px solid rgba(0,180,160,.18);border-radius:10px;padding:12px">
+            <div class="fk">CONSULTATION FEE</div>
+            <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--teal)" id="dp-fee">₹0</div>
+          </div>
+        </div>
+        <div class="pf"><div class="fgrid" id="dp-fields"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LAB DASHBOARD -->
+<div id="lb-dash" class="page">
+  <div class="dash">
+    <div class="dh">
+      <div><div class="dw">🔬 <span id="lbN">Lab</span></div><div style="font-size:12px;color:var(--t2);margin-top:3px" id="lbCity"></div></div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="drb rb-lb">Laboratory</div>
+        <div class="vb" style="background:rgba(255,171,0,.1);color:var(--amber);border:1px solid rgba(255,171,0,.2)">✓ Govt. Certified</div>
+      </div>
+    </div>
+    <div class="dtabs">
+      <button class="dtab active" onclick="lTab('up',this)">📤 Upload Reports</button>
+      <button class="dtab" onclick="lTab('hist',this)">📁 History</button>
+      <button class="dtab" onclick="lTab('prof',this)">🔬 Profile</button>
+    </div>
+    <div class="dc active" id="lb-up">
+      <div style="background:rgba(255,171,0,.04);border:1px solid rgba(255,171,0,.15);border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:var(--t2)">🔍 Search patient by <strong style="color:var(--amber)">Phone Number</strong> to upload their reports.</div>
+      <div class="sp"><div class="sbar"><input class="si2" id="lbSrch" placeholder="Patient phone number..." type="tel"><button class="sbtn" style="background:linear-gradient(135deg,var(--amber),#e65100)" onclick="lbSearch()">🔍 Find Patient</button></div></div>
+      <div id="lbResult" style="margin-top:16px"></div>
+    </div>
+    <div class="dc" id="lb-hist"><div class="shdr"><h2>📁 Upload History</h2></div><div class="rl" id="lb-hist-list"></div><div style="color:var(--t2);font-size:13px" id="lb-hist-empty">No uploads yet.</div></div>
+    <div class="dc" id="lb-prof">
+      <div class="pgrid">
+        <div class="pc"><div class="pav" style="background:linear-gradient(135deg,var(--amber),#e65100)">🔬</div><div class="pn" id="lp-name"></div><div class="pdet" id="lp-city"></div><div style="margin-top:10px"><div class="vb" style="background:rgba(255,171,0,.1);color:var(--amber);border:1px solid rgba(255,171,0,.2)">✓ Govt Certified</div></div></div>
+        <div class="pf"><div class="fgrid" id="lp-fields"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="mo" id="modal">
+  <div class="mb"><button class="mc" onclick="closeModal()">✕</button><div id="modalC"></div></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="toastI">✅</span><span id="toastM"></span></div>
+
+<script>
+// ─── DB ───
+const DB={get:k=>{try{return JSON.parse(localStorage.getItem('mc2_'+k))}catch{return null}},set:(k,v)=>localStorage.setItem('mc2_'+k,JSON.stringify(v)),push:(k,v)=>{const a=DB.get(k)||[];a.push(v);DB.set(k,a)}};
+let session={role:null,phone:null};
+let bpChart,sugarChart,weightChart;
+
+// ─── DRUG INTERACTION DATABASE ───
+const DRUG_INTERACTIONS={
+  'warfarin':['aspirin','ibuprofen','naproxen','metronidazole'],
+  'metformin':['alcohol','contrast dye'],
+  'lisinopril':['potassium','nsaids','spironolactone'],
+  'atorvastatin':['clarithromycin','erythromycin','gemfibrozil'],
+  'aspirin':['warfarin','ibuprofen','naproxen','heparin'],
+  'amlodipine':['simvastatin','grapefruit'],
+  'metoprolol':['verapamil','diltiazem','clonidine'],
+  'omeprazole':['clopidogrel','methotrexate']
+};
+
+function checkDrugInteraction(newMeds,existingMeds) {
+  if(!newMeds||!existingMeds) return null;
+  const nm=newMeds.toLowerCase();const em=existingMeds.toLowerCase();
+  for(const[drug,conflicts] of Object.entries(DRUG_INTERACTIONS)){
+    if(nm.includes(drug)||em.includes(drug)){
+      for(const c of conflicts){
+        if((nm.includes(c)&&em.includes(drug))||(em.includes(c)&&nm.includes(drug))||
+           (nm.includes(drug)&&em.includes(c))){return `⚠️ Potential interaction: ${drug} + ${c}`;}
+      }
+    }
+  }
+  return null;
+}
+
+// ─── SEED DEMO ───
+function seed(){
+  if(!DB.get('seeded2')){
+    DB.set('patient_9876543210',{name:'Arjun Sharma',phone:'9876543210',dob:'1990-05-15',gender:'Male',city:'New Delhi',blood:'O+',height:'175',weight:'72',allergies:'Penicillin, Dust',conditions:'Mild Hypertension, Pre-Diabetes',emergency:'Priya Sharma — 9876543211'});
+    DB.set('doctor_9988776655',{name:'Kavita Mehta',phone:'9988776655',degree:'MBBS, MD (Cardiology)',spec:'Cardiologist',exp:'14',hospital:'Apollo Hospital, Delhi',regnum:'DL-MCI-2010-4521',fee:'800'});
+    DB.set('lab_8877665544',{name:'LifeCare Diagnostics',phone:'8877665544',city:'Mumbai',reg:'LAB-MH-2024-001',tests:'Blood CBC, Lipid Profile, Thyroid, X-Ray, MRI, ECG',established:'2010'});
+    DB.set('records_9876543210',[
+      {date:'2024-11-20',illness:'Hypertensive Episode',symptoms:'Headache, dizziness, BP 160/100',severity:'Moderate',prescription:'Amlodipine 5mg, Losartan 50mg',notes:'Monitor BP twice daily. Reduce salt.',followup:'2024-12-04',doctor:'Dr. Kavita Mehta',hospital:'Apollo Hospital',spec:'Cardiologist',reports:[]},
+      {date:'2024-09-10',illness:'Viral Fever',symptoms:'Fever 102°F, body ache, fatigue',severity:'Mild',prescription:'Paracetamol 650mg, ORS, Rest 3 days',notes:'Plenty of fluids. Review if fever persists.',followup:'2024-09-17',doctor:'Dr. Rohan Gupta',hospital:'Max Hospital',spec:'General Physician',reports:[]}
+    ]);
+    DB.set('vitals_9876543210',{bp:[{date:'Nov 1',sys:145,dia:95},{date:'Nov 8',sys:138,dia:88},{date:'Nov 15',sys:132,dia:85},{date:'Nov 22',sys:128,dia:82},{date:'Nov 29',sys:124,dia:80}],sugar:[{date:'Nov 5',val:108},{date:'Nov 12',val:112},{date:'Nov 19',val:105},{date:'Nov 26',val:99}],weight:[{date:'Oct',val:74},{date:'Nov',val:72.5}]});
+    DB.set('appointments_9876543210',[{doctor:'Dr. Kavita Mehta',spec:'Cardiologist',hospital:'Apollo Hospital',datetime:'2025-07-15T10:30',reason:'BP Follow-up',status:'Confirmed'}]);
+    DB.set('seeded2',true);
+  }
+}
+seed();
+
+// ─── NAVIGATION ───
+function goLanding(){showPage('landing')}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function pTab(id,el){document.querySelectorAll('#pt-dash .dtab').forEach(t=>t.classList.remove('active'));el.classList.add('active');document.querySelectorAll('#pt-dash .dc').forEach(c=>c.classList.remove('active'));document.getElementById('pt-'+id).classList.add('active');if(id==='trends')initCharts();if(id==='ai')scrollChat()}
+function dTab(id,el){document.querySelectorAll('#dr-dash .dtab').forEach(t=>t.classList.remove('active'));el.classList.add('active');document.querySelectorAll('#dr-dash .dc').forEach(c=>c.classList.remove('active'));document.getElementById('dr-'+id).classList.add('active')}
+function lTab(id,el){document.querySelectorAll('#lb-dash .dtab').forEach(t=>t.classList.remove('active'));el.classList.add('active');document.querySelectorAll('#lb-dash .dc').forEach(c=>c.classList.remove('active'));document.getElementById('lb-'+id).classList.add('active')}
+function cdTab(id,el){document.querySelectorAll('.cd-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');document.querySelectorAll('.cd-content').forEach(c=>c.classList.remove('active'));document.getElementById('cd-'+id).classList.add('active')}
+function toggleEl(id){const e=document.getElementById(id);e.style.display=e.style.display==='none'?'block':'none'}
+
+// ─── MODALS ───
+function openModal(type){document.getElementById('modal').classList.add('active');const c=document.getElementById('modalC');
+  if(type==='pt') c.innerHTML=ptModalHTML();
+  else if(type==='dr') c.innerHTML=drModalHTML();
+  else if(type==='lb') c.innerHTML=lbModalHTML();
+  else if(type==='set') c.innerHTML=settingsHTML();
+}
+function closeModal(){document.getElementById('modal').classList.remove('active')}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal()});
+
+function ptModalHTML(){return`<div class="mt" style="color:var(--cyan)">👤 Patient Portal</div><div class="ms">Login or register with your phone number</div>
+<div class="tsw"><button class="tsb active" id="ptL" onclick="ptSw('l')">Login</button><button class="tsb" id="ptR" onclick="ptSw('r')">Register</button></div>
+<div id="ptLF">
+  <div class="fg2"><label class="fl">Phone Number</label><input class="fi2" id="plPh" placeholder="10-digit mobile number" type="tel"></div>
+  <button class="sb" style="background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.3);color:var(--cyan)" onclick="sendOTP('patient')">📱 Send OTP</button>
+  <div id="ptOtpWrap" style="display:none">
+    <div class="otp-sent">OTP sent to <span id="ptOtpPh"></span> · Use <strong>123456</strong> for demo</div>
+    <div class="otp-wrap"><input class="otp-box" maxlength="1" oninput="otpNext(this)"><input class="otp-box" maxlength="1" oninput="otpNext(this)"><input class="otp-box" maxlength="1" oninput="otpNext(this)"><input class="otp-box" maxlength="1" oninput="otpNext(this)"><input class="otp-box" maxlength="1" oninput="otpNext(this)"><input class="otp-box" maxlength="1" oninput="otpNext(this)"></div>
+    <button class="sb" onclick="verifyOTP('patient')">Verify & Login</button>
+  </div>
+</div>
+<div id="ptRF" style="display:none">
+  <div class="fr"><div class="fg2"><label class="fl">Full Name</label><input class="fi2" id="prN" placeholder="Your full name"></div><div class="fg2"><label class="fl">Phone Number</label><input class="fi2" id="prPh" placeholder="10 digits" type="tel"></div></div>
+  <div class="fr"><div class="fg2"><label class="fl">Date of Birth</label><input class="fi2" type="date" id="prD"></div><div class="fg2"><label class="fl">Gender</label><select class="fi2" id="prG"><option>Male</option><option>Female</option><option>Other</option></select></div></div>
+  <div class="fr"><div class="fg2"><label class="fl">City</label><input class="fi2" id="prCi" placeholder="Delhi..."></div><div class="fg2"><label class="fl">Blood Group</label><select class="fi2" id="prBl"><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div></div>
+  <div class="fr"><div class="fg2"><label class="fl">Height (cm)</label><input class="fi2" id="prH" type="number" placeholder="170"></div><div class="fg2"><label class="fl">Weight (kg)</label><input class="fi2" id="prW" type="number" placeholder="65"></div></div>
+  <div class="fg2"><label class="fl">Allergies</label><input class="fi2" id="prAl" placeholder="Penicillin, Dust, None..."></div>
+  <div class="fg2"><label class="fl">Existing Conditions</label><input class="fi2" id="prCo" placeholder="Diabetes, Hypertension, None..."></div>
+  <div class="fg2"><label class="fl">Emergency Contact</label><input class="fi2" id="prEm" placeholder="Name — Phone Number"></div>
+  <button class="sb" onclick="ptRegister()">Register & Verify</button>
+</div>`}
+
+function drModalHTML(){return`<div class="mt" style="color:var(--teal)">👨‍⚕️ Doctor Portal</div><div class="ms">Login or register as a verified doctor</div>
+<div class="tsw"><button class="tsb active" id="drL" onclick="drSw('l')">Login</button><button class="tsb" id="drR" onclick="drSw('r')">Register</button></div>
+<div id="drLF">
+  <div class="fg2"><label class="fl">Phone Number</label><input class="fi2" id="dlPh" placeholder="Registered phone" type="tel"></div>
+  <button class="sb gr" style="margin-bottom:10px" onclick="sendOTP('doctor')">📱 Send OTP</button>
+  <div id="drOtpWrap" style="display:none">
+    <div class="otp-sent">OTP sent · Use <strong>123456</strong> for demo</div>
+    <div class="otp-wrap"><input class="otp-box" maxlength="1" oninput="otpNext(this)"><input class="otp-box" maxlength="1" oninput="otpNext(this)"><input class="otp-box" maxlength="1" oninput="otpNext(this)"><input class="otp-box" maxlength="1" oninput="otpNext(this)"><input class="otp-box" maxlength="1" oninput="otpNext(this)"><input class="otp-box" maxlength="1" oninput="otpNext(this)"></div>
+    <button class="sb gr" onclick="verifyOTP('doctor')">Verify & Login</button>
+  </div>
+</div>
+<div id="drRF" style="display:none">
+  <div class="fr"><div class="fg2"><label class="fl">Full Name</label><input class="fi2" id="rrN" placeholder="Dr. Full Name"></div><div class="fg2"><label class="fl">Phone</label><input class="fi2" id="rrPh" placeholder="10 digits" type="tel"></div></div>
+  <div class="fr"><div class="fg2"><label class="fl">Degree</label><input class="fi2" id="rrDg" placeholder="MBBS, MD..."></div><div class="fg2"><label class="fl">Specialization</label><input class="fi2" id="rrSp" placeholder="Cardiologist..."></div></div>
+  <div class="fr"><div class="fg2"><label class="fl">Experience (yrs)</label><input class="fi2" id="rrEx" type="number" placeholder="10"></div><div class="fg2"><label class="fl">Fee (₹)</label><input class="fi2" id="rrFe" type="number" placeholder="500"></div></div>
+  <div class="fg2"><label class="fl">Hospital / Clinic</label><input class="fi2" id="rrHo" placeholder="Hospital name & city"></div>
+  <div class="fg2"><label class="fl">Medical Registration Number</label><input class="fi2" id="rrRn" placeholder="State MCI reg. number"></div>
+  <button class="sb gr" onclick="drRegister()">Register as Doctor</button>
+</div>`}
+
+function lbModalHTML(){return`<div class="mt" style="color:var(--amber)">🔬 Laboratory Portal</div><div class="ms">Login or register your certified laboratory</div>
+<div class="tsw"><button class="tsb active" id="lbL" onclick="lbSw('l')">Login</button><button class="tsb" id="lbR" onclick="lbSw('r')">Register</button></div>
+<div id="lbLF">
+  <div class="fg2"><label class="fl">Phone Number</label><input class="fi2" id="llPh" placeholder="Lab phone" type="tel"></div>
+  <button class="sb am" style="margin-bottom:10px" onclick="sendOTP('lab')">📱 Send OTP</button>
+  <div id="lbOtpWrap" style="display:none">
+    <div class="otp-sent">OTP sent · Use <strong>123456</strong> for demo</div>
+    <div class="otp-wrap"><input class="otp-box" maxlength="1" oninput="otpNext(this)"><input class="otp-box" maxlength="1" oninput="otpNext(this)"><input class="otp-box" maxlength="1" oninput="otpNext(this)"><input class="otp-box" maxlength="1" oninput="otpNext(this)"><input class="otp-box" maxlength="1" oninput="otpNext(this)"><input class="otp-box" maxlength="1" oninput="otpNext(this)"></div>
+    <button class="sb am" onclick="verifyOTP('lab')">Verify & Login</button>
+  </div>
+</div>
+<div id="lbRF" style="display:none">
+  <div class="fr"><div class="fg2"><label class="fl">Lab Name</label><input class="fi2" id="lrN" placeholder="Lab name"></div><div class="fg2"><label class="fl">Phone</label><input class="fi2" id="lrPh" placeholder="10 digits" type="tel"></div></div>
+  <div class="fr"><div class="fg2"><label class="fl">City</label><input class="fi2" id="lrCi" placeholder="City"></div><div class="fg2"><label class="fl">Established</label><input class="fi2" id="lrEs" type="number" placeholder="2005"></div></div>
+  <div class="fg2"><label class="fl">Govt. Registration Number</label><input class="fi2" id="lrRg" placeholder="Certification number"></div>
+  <div class="fg2"><label class="fl">Tests Offered</label><input class="fi2" id="lrTe" placeholder="Blood, X-Ray, MRI..."></div>
+  <button class="sb am" onclick="lbRegister()">Register Laboratory</button>
+</div>`}
+
+function settingsHTML(){return`<div class="mt">⚙️ Settings</div><div class="ms">Configure your MediCard preferences</div>
+<div class="set-group">
+  <div class="set-label">🤖 Google Gemini API Key</div>
+  <input class="set-input" id="geminiKey" value="${DB.get('geminiKey')||''}" placeholder="AIzaSy...">
+  <div class="set-note">Get your free key at <a href="https://aistudio.google.com" target="_blank" style="color:var(--cyan)">Google AI Studio</a>. Used for MediBot AI assistant.</div>
+</div>
+<button class="set-save" onclick="saveSettings()">Save Settings</button>`}
+
+function saveSettings(){DB.set('geminiKey',document.getElementById('geminiKey').value.trim());toast('Settings saved!','s');closeModal()}
+
+// ─── OTP FLOW ───
+function sendOTP(role){
+  let ph='';
+  if(role==='patient') ph=document.getElementById('plPh').value.trim();
+  else if(role==='doctor') ph=document.getElementById('dlPh').value.trim();
+  else ph=document.getElementById('llPh').value.trim();
+  if(ph.length<10){toast('Enter valid phone number','e');return}
+  if(role==='patient'){document.getElementById('ptOtpPh').textContent=ph;document.getElementById('ptOtpWrap').style.display='block'}
+  else if(role==='doctor'){document.getElementById('drOtpWrap').style.display='block'}
+  else{document.getElementById('lbOtpWrap').style.display='block'}
+  toast('OTP sent to '+ph+' (use 123456 for demo)','i')
+}
+
+function otpNext(el){if(el.value.length===1){const next=el.nextElementSibling;if(next&&next.classList.contains('otp-box'))next.focus()}}
+
+function getOTPValue(wrap){return Array.from(document.querySelectorAll(`#${wrap} .otp-box`)).map(i=>i.value).join('')}
+
+function verifyOTP(role){
+  let otp='',phone='';
+  if(role==='patient'){otp=getOTPValue('ptOtpWrap');phone=document.getElementById('plPh').value.trim()}
+  else if(role==='doctor'){otp=getOTPValue('drOtpWrap');phone=document.getElementById('dlPh').value.trim()}
+  else{otp=getOTPValue('lbOtpWrap');phone=document.getElementById('llPh').value.trim()}
+  if(otp!=='123456'){toast('Invalid OTP. Use 123456 for demo.','e');return}
+  if(role==='patient'){const pt=DB.get('patient_'+phone);if(!pt){toast('Account not found. Please register.','e');return}ptLogin(phone)}
+  else if(role==='doctor'){const dr=DB.get('doctor_'+phone);if(!dr){toast('Account not found. Please register.','e');return}drLogin(phone)}
+  else{const lb=DB.get('lab_'+phone);if(!lb){toast('Account not found. Please register.','e');return}lbLogin(phone)}
+}
+
+function ptSw(t){document.getElementById('ptL').classList.toggle('active',t==='l');document.getElementById('ptR').classList.toggle('active',t==='r');document.getElementById('ptLF').style.display=t==='l'?'block':'none';document.getElementById('ptRF').style.display=t==='r'?'block':'none'}
+function drSw(t){document.getElementById('drL').classList.toggle('active',t==='l');document.getElementById('drR').classList.toggle('active',t==='r');document.getElementById('drLF').style.display=t==='l'?'block':'none';document.getElementById('drRF').style.display=t==='r'?'block':'none'}
+function lbSw(t){document.getElementById('lbL').classList.toggle('active',t==='l');document.getElementById('lbR').classList.toggle('active',t==='r');document.getElementById('lbLF').style.display=t==='l'?'block':'none';document.getElementById('lbRF').style.display=t==='r'?'block':'none'}
+
+// ─── AUTH ───
+function ptRegister(){
+  const phone=document.getElementById('prPh').value.trim(),name=document.getElementById('prN').value.trim();
+  if(!phone||!name){toast('Fill required fields','e');return}
+  DB.set('patient_'+phone,{name,phone,dob:document.getElementById('prD').value,gender:document.getElementById('prG').value,city:document.getElementById('prCi').value,blood:document.getElementById('prBl').value,height:document.getElementById('prH').value,weight:document.getElementById('prW').value,allergies:document.getElementById('prAl').value,conditions:document.getElementById('prCo').value,emergency:document.getElementById('prEm').value});
+  ptLogin(phone);toast('Account created! Welcome '+name,'s')
+}
+
+function drRegister(){
+  const phone=document.getElementById('rrPh').value.trim(),name=document.getElementById('rrN').value.trim();
+  if(!phone||!name){toast('Fill required fields','e');return}
+  DB.set('doctor_'+phone,{name,phone,degree:document.getElementById('rrDg').value,spec:document.getElementById('rrSp').value,exp:document.getElementById('rrEx').value,hospital:document.getElementById('rrHo').value,regnum:document.getElementById('rrRn').value,fee:document.getElementById('rrFe').value});
+  drLogin(phone);toast('Doctor account created!','s')
+}
+
+function lbRegister(){
+  const phone=document.getElementById('lrPh').value.trim(),name=document.getElementById('lrN').value.trim();
+  if(!phone||!name){toast('Fill required fields','e');return}
+  DB.set('lab_'+phone,{name,phone,city:document.getElementById('lrCi').value,reg:document.getElementById('lrRg').value,tests:document.getElementById('lrTe').value,established:document.getElementById('lrEs').value});
+  lbLogin(phone);toast('Lab registered!','s')
+}
+
+function ptLogin(phone){session={role:'patient',phone};closeModal();loadPtDash();showPage('pt-dash');setLoggedIn();toast('Welcome back!','s')}
+function drLogin(phone){session={role:'doctor',phone};closeModal();loadDrDash();showPage('dr-dash');setLoggedIn();toast('Welcome, Dr!','s')}
+function lbLogin(phone){session={role:'lab',phone};closeModal();loadLbDash();showPage('lb-dash');setLoggedIn();toast('Welcome!','s')}
+
+function setLoggedIn(){['nPt','nDr','nLb'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById('nLo').style.display='flex';document.getElementById('nSet').style.display='flex';if(session.role==='patient'){document.getElementById('nEm').style.display='flex'}}
+function logout(){session={role:null,phone:null};['nPt','nDr','nLb'].forEach(id=>document.getElementById(id).style.display='flex');['nLo','nSet','nEm'].forEach(id=>document.getElementById(id).style.display='none');showPage('landing');toast('Logged out','s')}
+
+// ─── PATIENT DASHBOARD ───
+function loadPtDash(){
+  const pt=DB.get('patient_'+session.phone);if(!pt)return;
+  document.getElementById('ptN').textContent=pt.name;
+  document.getElementById('ptPh').textContent=pt.phone;
+  const recs=DB.get('records_'+session.phone)||[];
+  const labs=DB.get('labreports_'+session.phone)||[];
+  const appts=DB.get('appts_'+session.phone)||[];
+  const docs={};recs.forEach(r=>{if(!docs[r.doctor])docs[r.doctor]=r});
+  document.getElementById('ov1').textContent=recs.length;
+  document.getElementById('ov2').textContent=Object.keys(docs).length;
+  document.getElementById('ov3').textContent=labs.length;
+  document.getElementById('ov4').textContent=appts.length;
+  document.getElementById('pt-recent').innerHTML=recs.slice(-3).reverse().map(rHTML).join('')||'<div style="color:var(--t2);font-size:13px">No visits yet. Visit a doctor to start your health history.</div>';
+  document.getElementById('pt-hist-list').innerHTML=recs.length?[...recs].reverse().map(rHTML).join(''):'<div style="color:var(--t2);font-size:13px">No medical history yet.</div>';
+  // Lab reports
+  const lll=document.getElementById('pt-labs-list'),lEm=document.getElementById('pt-labs-empty');
+  if(labs.length){lEm.style.display='none';lll.innerHTML=labs.map(l=>`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden"><div style="padding:20px;background:rgba(255,171,0,.05);text-align:center;font-size:32px">📋</div><div style="padding:12px"><div style="font-weight:600;font-size:13px">${l.type}</div><div style="font-size:11px;color:var(--t2);font-family:'JetBrains Mono',monospace">${l.date}</div><div style="font-size:11px;color:var(--amber);margin-top:3px">${l.lab}</div>${l.summary?`<div style="font-size:11px;color:var(--t2);margin-top:4px">${l.summary}</div>`:''}</div></div>`).join('')}
+  else lEm.style.display='block';
+  // Appointments
+  const al=document.getElementById('pt-appt-list'),ae=document.getElementById('pt-appt-empty');
+  if(appts.length){ae.style.display='none';al.innerHTML=appts.map(a=>`<div class="ac"><div class="at">📅 ${fmtDt(a.datetime)}</div><div class="adn">${a.doctor}</div><div style="font-size:12px;color:var(--teal);margin-bottom:5px">${a.spec}</div><div style="font-size:12px;color:var(--t2)">🏥 ${a.hospital}</div><div style="font-size:12px;color:var(--t2)">📝 ${a.reason}</div><div style="margin-top:10px"><span class="as sc2">${a.status}</span></div></div>`).join('')}
+  else ae.style.display='block';
+  // Doctors
+  const dl=document.getElementById('pt-docs-list'),de=document.getElementById('pt-docs-empty');
+  const docList=Object.values(docs);
+  if(docList.length){de.style.display='none';dl.innerHTML=docList.map(d=>`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px"><div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,rgba(0,180,160,.25),rgba(0,212,255,.25));display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:10px">👨‍⚕️</div><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700">${d.doctor}</div><div style="font-size:12px;color:var(--teal);margin-bottom:6px">${d.spec}</div><div style="font-size:12px;color:var(--t2)">🏥 ${d.hospital||''}</div><div style="margin-top:8px"><span class="tag ti">${d.date}</span></div></div>`).join('')}
+  else de.style.display='block';
+  // Profile
+  document.getElementById('pp-name').textContent=pt.name;
+  document.getElementById('pp-ph').textContent='📱 '+pt.phone;
+  document.getElementById('pp-city').textContent='📍 '+(pt.city||'');
+  document.getElementById('pp-blood').textContent=pt.blood||'—';
+  document.getElementById('pp-fields').innerHTML=[['Name',pt.name],['Phone',pt.phone],['Date of Birth',pt.dob||'—'],['Gender',pt.gender||'—'],['City',pt.city||'—'],['Blood Group',pt.blood||'—'],['Height',(pt.height||'—')+' cm'],['Weight',(pt.weight||'—')+' kg'],['Allergies',pt.allergies||'None'],['Conditions',pt.conditions||'None'],['Emergency',pt.emergency||'—']].map(([k,v])=>`<div class="fi3"><div class="fk">${k}</div><div class="fv">${v}</div></div>`).join('');
+  // Emergency data
+  document.getElementById('em-blood').textContent=pt.blood||'Unknown';
+  document.getElementById('em-allergy').textContent=pt.allergies||'None known';
+  const lastRec=recs.length?recs[recs.length-1]:null;
+  document.getElementById('em-meds').textContent=lastRec?lastRec.prescription:'No records';
+  document.getElementById('em-contact').textContent=pt.emergency||'Not set';
+  // Chronic mode
+  const vitals=DB.get('vitals_'+session.phone)||{bp:[],sugar:[],weight:[]};
+  if(vitals.bp.length){const last=vitals.bp[vitals.bp.length-1];document.getElementById('cd-bp-val').textContent=last.sys+'/'+last.dia;document.getElementById('cd-bp-status').textContent=last.sys>140?'⚠️ High — Take medicines, rest':'✅ Good — Keep monitoring';}
+  if(vitals.sugar.length){const last=vitals.sugar[vitals.sugar.length-1];document.getElementById('cd-sugar-val').textContent=last.val;document.getElementById('cd-sugar-status').textContent=last.val>126?'⚠️ High — Review diet & medication':last.val>100?'⚡ Pre-diabetic range — Monitor closely':'✅ Normal range';}
+}
+
+function rHTML(r){return`<div class="rc"><div class="rch"><div class="rct">🏥 ${r.illness}</div><div class="rcd">${r.date}</div></div><div class="tags"><span class="tag ti">🦠 ${r.illness}</span><span class="tag ts">⚠️ ${r.severity}</span><span class="tag td">👨‍⚕️ ${r.doctor}</span>${r.hospital?`<span class="tag" style="background:rgba(124,77,255,.08);color:var(--purple);border:1px solid rgba(124,77,255,.18)">🏥 ${r.hospital}</span>`:''}</div><div class="rb2"><strong>Symptoms:</strong> ${r.symptoms}<br><strong>Doctor:</strong> ${r.doctor}${r.spec?' · '+r.spec:''}<br>${r.notes?`<strong>Notes:</strong> ${r.notes}<br>`:''} ${r.followup?`<strong>Follow-up:</strong> ${r.followup}`:''}</div>${r.prescription?`<div class="rx">💊 <strong>Prescription:</strong> ${r.prescription}</div>`:''}</div>`}
+
+function fmtDt(dt){try{return new Date(dt).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'})}catch{return dt}}
+
+// ─── CHARTS ───
+function initCharts(){
+  const vitals=DB.get('vitals_'+session.phone)||{bp:[{date:'Nov 1',sys:145,dia:95},{date:'Nov 8',sys:138,dia:88},{date:'Nov 15',sys:132,dia:85},{date:'Nov 22',sys:128,dia:82},{date:'Nov 29',sys:124,dia:80}],sugar:[{date:'Nov 5',val:108},{date:'Nov 12',val:112},{date:'Nov 19',val:105},{date:'Nov 26',val:99}],weight:[{date:'Oct',val:74},{date:'Nov',val:72.5}]};
+  const chartOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#7fa8c9',font:{family:'DM Sans'}}}},scales:{x:{ticks:{color:'#3d6080'},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#3d6080'},grid:{color:'rgba(255,255,255,.04)'}}}};
+  if(bpChart)bpChart.destroy();
+  bpChart=new Chart(document.getElementById('bpChart'),{type:'line',data:{labels:vitals.bp.map(v=>v.date),datasets:[{label:'Systolic',data:vitals.bp.map(v=>v.sys),borderColor:'#ff4560',backgroundColor:'rgba(255,69,96,.1)',tension:.4,fill:true},{label:'Diastolic',data:vitals.bp.map(v=>v.dia),borderColor:'#00d4ff',backgroundColor:'rgba(0,212,255,.1)',tension:.4,fill:true}]},options:{...chartOpts}});
+  if(sugarChart)sugarChart.destroy();
+  sugarChart=new Chart(document.getElementById('sugarChart'),{type:'line',data:{labels:vitals.sugar.map(v=>v.date),datasets:[{label:'Blood Sugar',data:vitals.sugar.map(v=>v.val),borderColor:'#ffab00',backgroundColor:'rgba(255,171,0,.1)',tension:.4,fill:true}]},options:{...chartOpts}});
+  if(weightChart)weightChart.destroy();
+  weightChart=new Chart(document.getElementById('weightChart'),{type:'line',data:{labels:vitals.weight.map(v=>v.date),datasets:[{label:'Weight (kg)',data:vitals.weight.map(v=>v.val),borderColor:'#00e676',backgroundColor:'rgba(0,230,118,.1)',tension:.4,fill:true}]},options:{...chartOpts}});
+}
+
+function addVital(type){
+  const vitals=DB.get('vitals_'+session.phone)||{bp:[],sugar:[],weight:[]};
+  const today=new Date().toLocaleDateString('en-IN',{month:'short',day:'numeric'});
+  if(type==='bp'){const sys=parseInt(document.getElementById('vSys').value),dia=parseInt(document.getElementById('vDia').value);if(!sys||!dia){toast('Enter both values','e');return}vitals.bp.push({date:today,sys,dia});DB.set('vitals_'+session.phone,vitals);document.getElementById('cd-bp-val').textContent=sys+'/'+dia;document.getElementById('cd-bp-status').textContent=sys>140?'⚠️ High — Take medicines, rest':'✅ Good — Keep monitoring';}
+  else if(type==='sugar'){const val=parseInt(document.getElementById('vSugar').value);if(!val){toast('Enter sugar value','e');return}vitals.sugar.push({date:today,val});DB.set('vitals_'+session.phone,vitals);document.getElementById('cd-sugar-val').textContent=val;document.getElementById('cd-sugar-status').textContent=val>126?'⚠️ High — Review diet & medication':val>100?'⚡ Pre-diabetic range':'✅ Normal range';}
+  else{const val=parseFloat(document.getElementById('vWeight').value);if(!val){toast('Enter weight','e');return}vitals.weight.push({date:today,val});DB.set('vitals_'+session.phone,vitals);}
+  toast('Vital logged!','s');initCharts();
+}
+
+// ─── PRESCRIPTION SCANNER ───
+function scanPrescription(e){
+  const file=e.target.files[0];if(!file)return;
+  toast('🔍 AI scanning prescription...','i');
+  setTimeout(()=>{
+    const medicines=['Amoxicillin 500mg','Paracetamol 650mg','Cetirizine 10mg','Pantoprazole 40mg','Azithromycin 500mg','Ibuprofen 400mg','Metformin 500mg','Amlodipine 5mg'];
+    const dosages=['1-0-1 (Twice daily)','0-0-1 (Once at night)','1-1-1 (Thrice daily)','1-0-0 (Once morning)','0-1-0 (Once afternoon)'];
+    const rx1=medicines[Math.floor(Math.random()*medicines.length)];
+    const rx2=medicines[Math.floor(Math.random()*medicines.length)];
+    const dose=dosages[Math.floor(Math.random()*dosages.length)];
+    const today=new Date().toISOString().slice(0,10);
+    document.getElementById('scanFields').innerHTML=`<div class="sf"><div class="sfk">Medicine 1</div><div class="sfv">${rx1}</div></div><div class="sf"><div class="sfk">Medicine 2</div><div class="sfv">${rx2}</div></div><div class="sf"><div class="sfk">Dosage</div><div class="sfv">${dose}</div></div><div class="sf"><div class="sfk">Duration</div><div class="sfv">5 days</div></div><div class="sf"><div class="sfk">Date</div><div class="sfv">${today}</div></div><div class="sf"><div class="sfk">Doctor</div><div class="sfv">Extracted</div></div>`;
+    document.getElementById('scanResult').classList.add('active');
+    window._scannedRx={medicine:rx1+', '+rx2,dosage:dose,date:today};
+    toast('✅ Prescription scanned successfully!','s');
+  },1800);
+}
+
+function saveScanToRecord(){
+  if(!window._scannedRx){toast('No scan to save','e');return}
+  DB.push('records_'+session.phone,{date:window._scannedRx.date,illness:'Scanned Prescription',symptoms:'From uploaded prescription',severity:'Mild',prescription:window._scannedRx.medicine,notes:'Digitized via AI Prescription Scanner',followup:'',doctor:'AI Scanner',hospital:'—',spec:'—',reports:[]});
+  toast('Saved to medical records!','s');loadPtDash();
+}
+
+// ─── EMERGENCY ───
+function showEmergency(){document.getElementById('emOverlay').classList.add('active')}
+function closeEmergency(){document.getElementById('emOverlay').classList.remove('active')}
+
+// ─── WHATSAPP ───
+function shareViaWhatsApp(type){
+  let msg='';
+  if(session.role==='patient'){
+    const pt=DB.get('patient_'+session.phone)||{};
+    const recs=DB.get('records_'+session.phone)||[];
+    if(type==='history'){msg=`📋 *My MediCard Health Summary*\nName: ${pt.name}\nBlood Group: ${pt.blood}\nAllergies: ${pt.allergies}\n\n*Recent Visits:*\n${recs.slice(-3).map(r=>`• ${r.date} — ${r.illness} (Dr.${r.doctor})\n  Rx: ${r.prescription}`).join('\n')}\n\n_Powered by MediCard_`}
+    else if(type==='prescription'){const last=recs[recs.length-1];msg=last?`💊 *Prescription from MediCard*\nDate: ${last.date}\nDoctor: ${last.doctor}\nPrescription: ${last.prescription}\n\n_MediCard Digital Health Platform_`:'No prescriptions found'}
+    else{msg=`📋 *My Complete MediCard Health Record*\nName: ${pt.name}\nPhone: ${pt.phone}\nBlood: ${pt.blood}\nAllergies: ${pt.allergies}\nConditions: ${pt.conditions}\n\nTotal Visits: ${recs.length}\n\n_MediCard Digital Health Platform_`}
+  }
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+function shareTokenWhatsApp(){
+  const token=document.getElementById('taToken').textContent;
+  const msg=`🔐 *MediCard Temporary Access Token*\n\nToken: *${token}*\nValid for: 24 hours\n\nEnter this token on MediCard Doctor Portal to access my medical records.\n\n_MediCard Digital Health Platform_`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+// ─── TEMPORARY ACCESS ───
+function generateToken(){
+  const token=Math.random().toString(36).substring(2,10).toUpperCase();
+  const expiry=new Date(Date.now()+24*60*60*1000);
+  DB.set('token_'+token,{phone:session.phone,expiry:expiry.toISOString()});
+  document.getElementById('taCard').style.display='block';
+  document.getElementById('taToken').textContent=token;
+  document.getElementById('taExp').textContent='⏱️ Expires: '+expiry.toLocaleString('en-IN');
+  toast('Access token generated!','s');
+}
+
+function revokeToken(){
+  const token=document.getElementById('taToken').textContent;
+  localStorage.removeItem('mc2_token_'+token);
+  document.getElementById('taCard').style.display='none';
+  toast('Access revoked!','s');
+}
+
+// ─── BOOK APPOINTMENT ───
+function bookAppt(){
+  const doc=document.getElementById('ap-doc').value.trim(),dt=document.getElementById('ap-dt').value;
+  if(!doc||!dt){toast('Fill doctor name and date','e');return}
+  DB.push('appts_'+session.phone,{doctor:doc,spec:document.getElementById('ap-sp').value,hospital:document.getElementById('ap-ho').value,datetime:dt,reason:document.getElementById('ap-re').value,status:'Confirmed'});
+  document.getElementById('bookForm').style.display='none';
+  toast('Appointment booked!','s');loadPtDash();
+}
+
+// ─── AI HEALTH SUMMARY ───
+async function generateAISummary(){
+  const pt=DB.get('patient_'+session.phone)||{};
+  const recs=DB.get('records_'+session.phone)||[];
+  const vitals=DB.get('vitals_'+session.phone)||{};
+  document.getElementById('aiSummaryText').innerHTML='<span style="color:var(--t2)">🤖 Generating your personalized health summary...</span>';
+  const context=`Patient: ${pt.name}, ${pt.gender}, DOB: ${pt.dob}. Blood: ${pt.blood}. Allergies: ${pt.allergies}. Conditions: ${pt.conditions}. ${recs.length} medical visits. Recent: ${recs.slice(-2).map(r=>r.illness).join(', ')}. Latest BP: ${vitals.bp&&vitals.bp.length?vitals.bp[vitals.bp.length-1].sys+'/'+vitals.bp[vitals.bp.length-1].dia+' mmHg':'unknown'}`;
+  const reply=await callGemini(`Generate a concise 3-4 sentence personalized health summary for this patient. Mention key health metrics, any concerns, and positive lifestyle recommendations. Patient data: ${context}. Keep it warm, clear, and actionable.`);
+  document.getElementById('aiSummaryText').textContent=reply;
+}
+
+// ─── GEMINI AI ───
+async function callGemini(prompt){
+  const key=DB.get('geminiKey');
+  if(!key){return'⚙️ Add your Gemini API key in Settings (⚙️ top-right) to enable AI features. Get a free key at Google AI Studio.'}
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+    const data=await res.json();
+    if(data.error) return'❌ API Error: '+data.error.message;
+    return data.candidates?.[0]?.content?.parts?.[0]?.text||'No response received.';
+  }catch(e){return'❌ Connection error. Check your API key in Settings.'}
+}
+
+// ─── CHATBOT ───
+function chatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat()}}
+function sendSug(t){document.getElementById('chatIn').value=t;sendChat()}
+function scrollChat(){const m=document.getElementById('chatMsgs');if(m)m.scrollTop=m.scrollHeight}
+
+async function sendChat(){
+  const inp=document.getElementById('chatIn');
+  const msg=inp.value.trim();if(!msg)return;inp.value='';
+  appendMsg(msg,'u');addTyping();
+  const pt=DB.get('patient_'+session.phone)||{};
+  const recs=DB.get('records_'+session.phone)||[];
+  const labs=DB.get('labreports_'+session.phone)||[];
+  const vitals=DB.get('vitals_'+session.phone)||{};
+  const prompt=`You are MediBot, an empathetic AI health assistant for MediCard — India's digital health platform. Answer based on this patient's actual health data.
+
+PATIENT PROFILE:
+Name: ${pt.name} | Gender: ${pt.gender} | DOB: ${pt.dob} | Blood: ${pt.blood}
+Allergies: ${pt.allergies||'None'} | Conditions: ${pt.conditions||'None'} | Emergency: ${pt.emergency||'Not set'}
+
+MEDICAL RECORDS (${recs.length} visits):
+${recs.map(r=>`[${r.date}] ${r.illness} (${r.severity}) — Dr.${r.doctor} — Rx: ${r.prescription}`).join('\n')}
+
+LAB REPORTS (${labs.length}):
+${labs.map(r=>`[${r.date}] ${r.type}: ${r.summary||'No summary'}`).join('\n')||'None'}
+
+VITALS:
+Latest BP: ${vitals.bp&&vitals.bp.length?vitals.bp[vitals.bp.length-1].sys+'/'+vitals.bp[vitals.bp.length-1].dia+' mmHg':'Not logged'}
+Latest Sugar: ${vitals.sugar&&vitals.sugar.length?vitals.sugar[vitals.sugar.length-1].val+' mg/dL':'Not logged'}
+
+INSTRUCTIONS: Be concise, warm, and helpful. Always recommend consulting their doctor for medical decisions. Do not use excessive markdown.
+
+PATIENT QUESTION: ${msg}`;
+  const reply=await callGemini(prompt);
+  removeTyping();appendMsg(reply,'a');
+}
+
+function appendMsg(text,role){
+  const c=document.getElementById('chatMsgs');
+  const now=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  const d=document.createElement('div');d.className='msg '+role;
+  d.innerHTML=`<div class="mb2">${text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div><div class="mt2">${now}</div>`;
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+function addTyping(){const c=document.getElementById('chatMsgs');const d=document.createElement('div');d.className='msg a';d.id='typing';d.innerHTML=`<div class="mb2"><div class="tdots"><span></span><span></span><span></span></div></div>`;c.appendChild(d);c.scrollTop=c.scrollHeight}
+function removeTyping(){const t=document.getElementById('typing');if(t)t.remove()}
+
+// ─── EXPORT PDF ───
+function exportPDF(type='full'){
+  const pt=DB.get('patient_'+session.phone)||{};
+  const recs=DB.get('records_'+session.phone)||[];
+  const labs=DB.get('labreports_'+session.phone)||[];
+  let html=`<html><head><title>MediCard Health Report</title><style>body{font-family:Arial,sans-serif;color:#111;padding:30px;max-width:900px;margin:0 auto}.header{background:#004c6d;color:white;padding:20px;border-radius:8px;margin-bottom:24px}.name{font-size:24px;font-weight:bold}.section{margin-bottom:24px;border:1px solid #ddd;border-radius:8px;overflow:hidden}.section-title{background:#f5f5f5;padding:12px 16px;font-weight:bold;border-bottom:1px solid #ddd;font-size:16px}.section-body{padding:16px}.field{display:flex;margin-bottom:8px}.field-key{font-weight:bold;width:180px;color:#555;font-size:13px}.field-val{font-size:13px}.record{border:1px solid #e8e8e8;border-radius:6px;padding:14px;margin-bottom:12px}.rec-title{font-size:16px;font-weight:bold;color:#004c6d}.date{font-size:12px;color:#888}.rx{background:#f0fff4;border:1px solid #b2dfdb;padding:10px;border-radius:4px;margin-top:8px;font-size:13px}@media print{body{padding:0}}</style></head><body>`;
+  html+=`<div class="header"><div class="name">⚕️ MediCard Health Report</div><div style="font-size:14px;margin-top:4px">${pt.name} · ${type==='emergency'?'EMERGENCY CARD':'Complete Medical Record'}</div><div style="font-size:12px;opacity:.8">Generated: ${new Date().toLocaleDateString('en-IN',{dateStyle:'full'})}</div></div>`;
+  if(type!=='prescriptions'){html+=`<div class="section"><div class="section-title">Patient Information</div><div class="section-body">${[['Name',pt.name],['Phone',pt.phone],['Date of Birth',pt.dob],['Gender',pt.gender],['City',pt.city],['Blood Group',`<strong style="color:red">${pt.blood}</strong>`],['Allergies',`<strong style="color:orange">${pt.allergies||'None'}</strong>`],['Conditions',pt.conditions||'None'],['Emergency Contact',pt.emergency||'—']].map(([k,v])=>`<div class="field"><div class="field-key">${k}</div><div class="field-val">${v||'—'}</div></div>`).join('')}</div></div>`}
+  if(type!=='emergency'){html+=`<div class="section"><div class="section-title">Medical Records (${recs.length} visits)</div><div class="section-body">${recs.length?[...recs].reverse().map(r=>`<div class="record"><div style="display:flex;justify-content:space-between"><span class="rec-title">${r.illness}</span><span class="date">${r.date}</span></div><div style="font-size:13px;color:#555;margin:6px 0">Symptoms: ${r.symptoms} · Severity: ${r.severity}</div><div style="font-size:13px">Doctor: ${r.doctor} · ${r.hospital||''}</div>${r.prescription?`<div class="rx">💊 Prescription: ${r.prescription}</div>`:''}</div>`).join(''):'<p>No medical records.</p>'}</div></div>`}
+  if(labs.length&&type!=='emergency'&&type!=='prescriptions'){html+=`<div class="section"><div class="section-title">Lab Reports (${labs.length})</div><div class="section-body">${labs.map(l=>`<div class="record"><strong>${l.type}</strong><span class="date" style="margin-left:10px">${l.date}</span><div style="font-size:13px;color:#555">${l.lab}${l.summary?' · '+l.summary:''}</div></div>`).join('')}</div></div>`}
+  html+=`</body></html>`;
+  const w=window.open('','_blank');w.document.write(html);w.document.close();setTimeout(()=>w.print(),500);
+}
+
+// ─── DOCTOR DASHBOARD ───
+function loadDrDash(){
+  const dr=DB.get('doctor_'+session.phone);if(!dr)return;
+  document.getElementById('drN').textContent=dr.name;
+  document.getElementById('drSp').textContent=dr.spec+' · '+dr.hospital;
+  document.getElementById('dp-name').textContent='Dr. '+dr.name;
+  document.getElementById('dp-spec').textContent=dr.spec;
+  document.getElementById('dp-hosp').textContent='🏥 '+dr.hospital;
+  document.getElementById('dp-fee').textContent='₹'+dr.fee;
+  document.getElementById('dp-fields').innerHTML=[['Degree',dr.degree],['Specialization',dr.spec],['Experience',dr.exp+' years'],['Hospital',dr.hospital],['Reg. Number',dr.regnum],['Fee','₹'+dr.fee],['Phone',dr.phone]].map(([k,v])=>`<div class="fi3"><div class="fk">${k}</div><div class="fv">${v||'—'}</div></div>`).join('');
+  // Dr appointments
+  const allKeys=Object.keys(localStorage).filter(k=>k.startsWith('mc2_appts_'));
+  let drAppts=[];
+  allKeys.forEach(k=>{const phone=k.replace('mc2_appts_','');const appts=DB.get('appts_'+phone)||[];appts.forEach(a=>{if(a.doctor.toLowerCase().includes(dr.name.toLowerCase())){const pt=DB.get('patient_'+phone);drAppts.push({...a,ptName:pt?pt.name:phone,ptPhone:phone})}})});
+  const al=document.getElementById('dr-appts-list'),ae=document.getElementById('dr-appts-empty');
+  if(drAppts.length){ae.style.display='none';al.innerHTML=drAppts.map(a=>`<div class="ac"><div class="at">📅 ${fmtDt(a.datetime)}</div><div class="adn">👤 ${a.ptName}</div><div style="font-size:12px;color:var(--t2);margin-bottom:5px">📱 ${a.ptPhone}</div><div style="font-size:12px;color:var(--t2)">📝 ${a.reason}</div><div style="margin-top:10px"><span class="as sc2">Confirmed</span></div></div>`).join('')}
+  else ae.style.display='block';
+}
+
+// ─── DOCTOR SEARCH ───
+function drSearch(){
+  const q=document.getElementById('drSrch').value.trim();
+  const pt=findPatient(q);
+  if(!pt){document.getElementById('drResult').innerHTML=`<div style="color:var(--red);padding:14px;background:rgba(255,69,96,.05);border:1px solid rgba(255,69,96,.2);border-radius:12px">❌ No patient found with that phone number.</div>`;return}
+  renderDrPatientResult(pt.pt,pt.phone);
+}
+
+function drTokenSearch(){
+  const token=document.getElementById('drToken').value.trim().toUpperCase();
+  const data=DB.get('token_'+token);
+  if(!data){document.getElementById('drResult').innerHTML=`<div style="color:var(--red);padding:14px;background:rgba(255,69,96,.05);border:1px solid rgba(255,69,96,.2);border-radius:12px">❌ Invalid or expired token.</div>`;return}
+  if(new Date()>new Date(data.expiry)){document.getElementById('drResult').innerHTML=`<div style="color:var(--amber);padding:14px;background:rgba(255,171,0,.05);border:1px solid rgba(255,171,0,.2);border-radius:12px">⏱️ Token expired. Patient must generate a new one.</div>`;return}
+  const pt=DB.get('patient_'+data.phone);
+  if(!pt){toast('Patient not found','e');return}
+  renderDrPatientResult(pt,data.phone);toast('✅ Token access granted!','s');
+}
+
+function findPatient(q){
+  const keys=Object.keys(localStorage).filter(k=>k.startsWith('mc2_patient_'));
+  for(const k of keys){const phone=k.replace('mc2_patient_','');const data=DB.get('patient_'+phone);if(data&&(data.phone===q)){return{pt:data,phone}}}
+  return null;
+}
+
+function renderDrPatientResult(pt,phone){
+  const recs=DB.get('records_'+phone)||[];
+  const labs=DB.get('labreports_'+phone)||[];
+  const allMeds=recs.map(r=>r.prescription).filter(Boolean).join(', ');
+  window._drPtPhone=phone;
+  const insights=generateInsights(recs);
+  document.getElementById('drResult').innerHTML=`
+<div style="background:var(--bg2);border:1px solid rgba(0,212,255,.25);border-radius:16px;padding:22px;margin-bottom:16px">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+    <div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800">${pt.name}</div><div style="font-size:13px;color:var(--t2)">🩸 ${pt.blood} · ${pt.gender} · 📍 ${pt.city} · 📱 ${pt.phone}</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="ab t" onclick="toggleEl('addRecForm')">⚡ Add Record</button><button class="wa-btn" onclick="drShareWhatsApp('${phone}')">📲 WhatsApp</button></div>
+  </div>
+  <div class="fgrid" style="margin-bottom:16px">${[['Blood',pt.blood],['Allergies',pt.allergies||'None'],['Conditions',pt.conditions||'None'],['Emergency',pt.emergency||'—']].map(([k,v])=>`<div class="fi3"><div class="fk">${k}</div><div class="fv">${v}</div></div>`).join('')}</div>
+  <div id="addRecForm" style="display:none;background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px">
+    <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:14px">⚡ Quick Visit Entry</div>
+    <div style="margin-bottom:14px"><div style="font-size:12px;color:var(--t2);margin-bottom:8px;letter-spacing:.5px">QUICK TEMPLATES</div><div class="templ-grid">
+      <div class="templ-btn" onclick="loadTemplate('fever')"><div class="ti2">🤒</div><h4>Fever</h4><p>Viral fever</p></div>
+      <div class="templ-btn" onclick="loadTemplate('cold')"><div class="ti2">🤧</div><h4>Cold & Flu</h4><p>URI symptoms</p></div>
+      <div class="templ-btn" onclick="loadTemplate('bp')"><div class="ti2">💓</div><h4>Hypertension</h4><p>BP management</p></div>
+      <div class="templ-btn" onclick="loadTemplate('diabetes')"><div class="ti2">💉</div><h4>Diabetes</h4><p>Sugar control</p></div>
+      <div class="templ-btn" onclick="loadTemplate('stomach')"><div class="ti2">🤢</div><h4>Gastro</h4><p>GI symptoms</p></div>
+      <div class="templ-btn" onclick="loadTemplate('asthma')"><div class="ti2">🫁</div><h4>Asthma</h4><p>Respiratory</p></div>
+    </div></div>
+    <div id="drugWarnBanner" class="dw-alert"><span style="font-size:20px">⚠️</span><div><strong style="color:var(--red)">Drug Interaction Warning</strong><div id="drugWarnText"></div></div></div>
+    <div id="aiSuggestBox" class="ai-suggest"><div class="ai-suggest-title">🧠 AI Suggestions (tap to fill)</div><div class="ai-suggest-items" id="aiSugItems"></div></div>
+    <div class="fr"><div class="fg2"><label class="fl">Illness / Diagnosis</label><input class="fi2" id="ar-il" placeholder="Diagnosis..." oninput="checkInteractions(this.value,'${allMeds}')"></div><div class="fg2"><label class="fl">Severity</label><select class="fi2" id="ar-se"><option>Mild</option><option>Moderate</option><option>Severe</option><option>Critical</option></select></div></div>
+    <div class="fg2"><label class="fl">Symptoms</label><input class="fi2" id="ar-sy" placeholder="Fever, headache, BP..."></div>
+    <div class="fg2"><label class="fl">Prescription</label><input class="fi2" id="ar-rx" placeholder="Medicine name + dosage" oninput="checkInteractions('${allMeds}',this.value)"></div>
+    <div class="fg2"><label class="fl">Doctor Notes</label><textarea class="fi2" rows="2" id="ar-no" placeholder="Clinical notes, instructions..."></textarea></div>
+    <div class="fr"><div class="fg2"><label class="fl">Date</label><input class="fi2" type="date" id="ar-dt" value="${new Date().toISOString().slice(0,10)}"></div><div class="fg2"><label class="fl">Follow-up Date</label><input class="fi2" type="date" id="ar-fu"></div></div>
+    <div class="fg2" style="margin-top:4px"><label class="fl">Attach Report Image</label><div class="uz" style="padding:18px" onclick="document.getElementById('drRepFile').click()"><div>📁 Click to attach image or PDF</div><input type="file" id="drRepFile" accept=".jpg,.jpeg,.png,.pdf" onchange="previewDrRep(event)"></div><div id="drRepPreview"></div></div>
+    <button class="sb gr" style="margin-top:12px;padding:12px" onclick="submitDrRecord('${phone}')">✅ Save Record</button>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700">📋 Visit History (${recs.length})</div></div>
+  <div class="rl">${recs.length?[...recs].reverse().map(rHTML).join(''):'<div style="color:var(--t2);font-size:13px">No visits yet.</div>'}</div>
+  ${labs.length?`<div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin:14px 0">🔬 Lab Reports (${labs.length})</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">${labs.map(l=>`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center"><div style="font-size:24px;margin-bottom:6px">📋</div><div style="font-size:12px;font-weight:600">${l.type}</div><div style="font-size:11px;color:var(--t2)">${l.date}</div><div style="font-size:11px;color:var(--amber)">${l.lab}</div></div>`).join('')}</div>`:''}
+</div>`;
+  // Load insights
+  document.getElementById('drInsights').innerHTML=insightsHTML(pt,recs,insights);
+}
+
+function generateInsights(recs){
+  const ill={},meds={};
+  recs.forEach(r=>{ill[r.illness]=(ill[r.illness]||0)+1;if(r.prescription)r.prescription.split(',').forEach(m=>{const mn=m.trim();meds[mn]=(meds[mn]||0)+1})});
+  return{illnesses:Object.entries(ill).sort((a,b)=>b[1]-a[1]).slice(0,5),medicines:Object.entries(meds).sort((a,b)=>b[1]-a[1]).slice(0,5)};
+}
+
+function insightsHTML(pt,recs,ins){
+  const hasHtn=pt.conditions&&pt.conditions.toLowerCase().includes('hypertension');
+  const hasDiab=pt.conditions&&pt.conditions.toLowerCase().includes('diabetes');
+  return`<div class="insights-grid">
+<div class="insight-card"><div class="ic-title">🦠 Frequent Illnesses</div>${ins.illnesses.map(([i,c])=>`<div class="ic-item"><span>${i}</span><span class="ic-count">${c}x</span></div>`).join('')||'<div class="ic-item" style="color:var(--t2)">No data</div>'}</div>
+<div class="insight-card"><div class="ic-title">💊 Repeated Prescriptions</div>${ins.medicines.slice(0,4).map(([m,c])=>`<div class="ic-item"><span>${m}</span><span class="ic-count">${c}x</span></div>`).join('')||'<div class="ic-item" style="color:var(--t2)">No data</div>'}</div>
+<div class="insight-card"><div class="ic-title">⚠️ Risk Flags</div>
+${hasHtn?`<div class="ic-item"><span>Hypertension risk</span><span class="risk-flag rf-high">HIGH</span></div>`:''}
+${hasDiab?`<div class="ic-item"><span>Diabetic management</span><span class="risk-flag rf-med">MEDIUM</span></div>`:''}
+${recs.length>3?`<div class="ic-item"><span>Recurring visits (${recs.length})</span><span class="risk-flag rf-med">REVIEW</span></div>`:''}
+${!hasHtn&&!hasDiab&&recs.length<=3?`<div class="ic-item"><span>No major flags</span><span class="risk-flag rf-low">LOW</span></div>`:''}
+</div></div>`;
+}
+
+// ─── DOCTOR TEMPLATES ───
+const TEMPLATES={
+  fever:{illness:'Viral Fever',symptoms:'Fever 100-103°F, body ache, headache, fatigue',severity:'Mild',prescription:'Paracetamol 650mg (TDS), ORS, Cetirizine 10mg (HS)',notes:'Rest 3-5 days. Plenty of fluids. Avoid cold food.'},
+  cold:{illness:'Acute URTI / Cold',symptoms:'Runny nose, sore throat, mild cough, sneezing',severity:'Mild',prescription:'Cetirizine 10mg, Ambroxol 30mg (BD), Saline nasal spray',notes:'Steam inhalation 2x daily. Warm fluids. Avoid cold.'},
+  bp:{illness:'Hypertensive Episode',symptoms:'Headache, dizziness, BP elevated',severity:'Moderate',prescription:'Amlodipine 5mg (OD), Losartan 50mg (OD)',notes:'Monitor BP twice daily. Reduce salt. No stress. Follow-up in 2 weeks.'},
+  diabetes:{illness:'Diabetes Management Visit',symptoms:'Elevated blood sugar, fatigue, increased thirst',severity:'Moderate',prescription:'Metformin 500mg (BD with meals), Glimepiride 1mg (OD)',notes:'Fasting sugar daily. Diabetic diet. Walk 30 min/day. HbA1c in 3 months.'},
+  stomach:{illness:'Acute Gastroenteritis',symptoms:'Nausea, vomiting, loose stools, abdominal cramps',severity:'Mild',prescription:'Ondansetron 4mg (TDS), ORS 200ml after each loose stool, Pantoprazole 40mg',notes:'BRAT diet. Plenty of fluids. Avoid dairy for 48 hours.'},
+  asthma:{illness:'Acute Asthma Exacerbation',symptoms:'Shortness of breath, wheezing, chest tightness',severity:'Moderate',prescription:'Salbutamol inhaler 2 puffs (PRN), Budesonide 200mcg inhaler (BD)',notes:'Avoid triggers. Keep rescue inhaler always. Spirometry in 1 month.'}
+};
+
+function loadTemplate(t){
+  const tp=TEMPLATES[t];if(!tp)return;
+  document.getElementById('ar-il').value=tp.illness;
+  document.getElementById('ar-sy').value=tp.symptoms;
+  document.getElementById('ar-se').value=tp.severity;
+  document.getElementById('ar-rx').value=tp.prescription;
+  document.getElementById('ar-no').value=tp.notes;
+  showAISuggestions(t);
+  toast('Template loaded!','s');
+}
+
+function showAISuggestions(t){
+  const suggestions={fever:['Dengue NS1 test if fever>5 days','CBC with Differential','Platelet count if low','Check for malaria if endemic area'],cold:['Throat culture if bacterial suspected','Avoid antibiotics for viral URI','Steam inhalation helps'],bp:['ECG if first hypertension diagnosis','Serum Creatinine + Electrolytes','BP log twice daily at home'],diabetes:['HbA1c test ordered','Urine microalbumin annually','Foot examination','Eye check annually'],stomach:['Stool culture if bloody diarrhea','Electrolyte panel if severe','Monitor hydration'],asthma:['Peak flow meter reading','Chest X-Ray if first episode','Allergy testing if recurrent']};
+  const sugs=suggestions[t]||[];
+  if(!sugs.length)return;
+  document.getElementById('aiSuggestBox').classList.add('show');
+  document.getElementById('aiSugItems').innerHTML=sugs.map(s=>`<span class="asi" onclick="appendNote('${s.replace(/'/g,"")}')">${s}</span>`).join('');
+}
+
+function appendNote(txt){const n=document.getElementById('ar-no');n.value=(n.value?n.value+'\n':'')+txt}
+
+function checkInteractions(newMed,existingMeds){
+  const warn=checkDrugInteraction(newMed,existingMeds);
+  const banner=document.getElementById('drugWarnBanner');
+  if(warn&&banner){document.getElementById('drugWarnText').textContent=warn;banner.classList.add('show')}
+  else if(banner)banner.classList.remove('show');
+}
+
+let _drRepData=null;
+function previewDrRep(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{_drRepData={name:file.name,data:ev.target.result};document.getElementById('drRepPreview').innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(0,230,118,.06);border-radius:8px;margin-top:8px;font-size:13px"><span>📄</span><span>${file.name}</span></div>`};r.readAsDataURL(file)}
+
+function submitDrRecord(phone){
+  const dr=DB.get('doctor_'+session.phone);
+  const illness=document.getElementById('ar-il').value.trim();
+  if(!illness){toast('Enter illness/diagnosis','e');return}
+  const rec={date:document.getElementById('ar-dt').value,illness,symptoms:document.getElementById('ar-sy').value,severity:document.getElementById('ar-se').value,prescription:document.getElementById('ar-rx').value,notes:document.getElementById('ar-no').value,followup:document.getElementById('ar-fu').value,doctor:'Dr. '+dr.name,hospital:dr.hospital,spec:dr.spec,reports:_drRepData?[_drRepData.name]:[]};
+  DB.push('records_'+phone,rec);
+  _drRepData=null;
+  toast('Record saved!','s');
+  const pt=DB.get('patient_'+phone);
+  renderDrPatientResult(pt,phone);
+}
+
+function drShareWhatsApp(phone){
+  const pt=DB.get('patient_'+phone)||{};
+  const recs=DB.get('records_'+phone)||[];
+  const last=recs[recs.length-1];
+  const msg=`📋 *MediCard Visit Summary*\nPatient: ${pt.name}\nBlood Group: ${pt.blood}\nAllergies: ${pt.allergies||'None'}\n\n*Latest Record:*\nDiagnosis: ${last?last.illness:'—'}\nPrescription: ${last?last.prescription:'—'}\nDate: ${last?last.date:'—'}\n\n_Shared via MediCard_`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+// ─── LAB DASHBOARD ───
+function loadLbDash(){
+  const lb=DB.get('lab_'+session.phone);if(!lb)return;
+  document.getElementById('lbN').textContent=lb.name;
+  document.getElementById('lbCity').textContent='📍 '+lb.city+' · Reg: '+lb.reg;
+  document.getElementById('lp-name').textContent=lb.name;
+  document.getElementById('lp-city').textContent='📍 '+lb.city;
+  document.getElementById('lp-fields').innerHTML=[['Lab Name',lb.name],['City',lb.city],['Registration',lb.reg],['Tests',lb.tests],['Established',lb.established],['Phone',lb.phone]].map(([k,v])=>`<div class="fi3"><div class="fk">${k}</div><div class="fv">${v||'—'}</div></div>`).join('');
+  renderLbHistory();
+}
+
+let _lbPtPhone=null;
+function lbSearch(){
+  const q=document.getElementById('lbSrch').value.trim();
+  const result=findPatient(q);
+  if(!result){document.getElementById('lbResult').innerHTML=`<div style="color:var(--red);padding:14px;background:rgba(255,69,96,.05);border:1px solid rgba(255,69,96,.2);border-radius:12px">❌ Patient not found.</div>`;return}
+  const{pt,phone}=result;_lbPtPhone=phone;
+  document.getElementById('lbResult').innerHTML=`
+<div style="background:var(--bg2);border:1px solid rgba(255,171,0,.25);border-radius:16px;padding:22px">
+  <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:4px">${pt.name} <span class="vb g" style="font-size:10px">✓ Found</span></div>
+  <div style="font-size:13px;color:var(--t2);margin-bottom:18px">🩸 ${pt.blood} · ${pt.gender} · 📍 ${pt.city}</div>
+  <div class="fg2"><label class="fl">Report Type</label><select class="fi2" id="lbType"><option>Blood Test — CBC</option><option>Blood Test — Lipid Profile</option><option>Blood Test — Thyroid Panel</option><option>Blood Test — LFT</option><option>Blood Test — KFT</option><option>Blood Test — HbA1c</option><option>Urine Analysis</option><option>X-Ray</option><option>MRI Scan</option><option>CT Scan</option><option>ECG</option><option>Ultrasound</option><option>COVID RT-PCR</option><option>Other</option></select></div>
+  <div class="fr"><div class="fg2"><label class="fl">Test Date</label><input class="fi2" type="date" id="lbDate" value="${new Date().toISOString().slice(0,10)}"></div><div class="fg2"><label class="fl">Result Summary</label><input class="fi2" id="lbSumm" placeholder="Normal / Abnormal / values..."></div></div>
+  <div class="fg2"><label class="fl">Notes / Observations</label><textarea class="fi2" rows="2" id="lbNotes" placeholder="Lab technician notes..."></textarea></div>
+  <div class="uz" onclick="document.getElementById('lbFile').click()" id="lbUz"><div style="font-size:36px;margin-bottom:8px">📄</div><h3>Upload Report File</h3><p style="font-size:12px;color:var(--t2)">PDF or image (JPG, PNG)</p><input type="file" id="lbFile" accept=".pdf,.jpg,.jpeg,.png" onchange="lbFileChg(event)"></div>
+  <div id="lbFilePrev" style="display:none;margin-bottom:14px"></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button class="sb am" style="padding:12px;max-width:300px" onclick="uploadLbReport()">📤 Upload to Patient Profile</button><button class="wa-btn" onclick="lbShareWhatsApp('${phone}')">📲 Notify via WhatsApp</button></div>
+</div>`;
+}
+
+let _lbFile=null;
+function lbFileChg(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{_lbFile={name:file.name};document.getElementById('lbFilePrev').style.display='block';document.getElementById('lbFilePrev').innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.2);border-radius:8px"><span>📄</span><span style="font-size:13px">${file.name}</span></div>`;document.getElementById('lbUz').style.display='none'};r.readAsDataURL(e.target.files[0])}
+
+function uploadLbReport(){
+  if(!_lbPtPhone){toast('Search patient first','e');return}
+  const lb=DB.get('lab_'+session.phone);
+  const report={type:document.getElementById('lbType').value,date:document.getElementById('lbDate').value,summary:document.getElementById('lbSumm').value,notes:document.getElementById('lbNotes').value,lab:lb.name,file:_lbFile?_lbFile.name:null};
+  DB.push('labreports_'+_lbPtPhone,report);
+  const pt=DB.get('patient_'+_lbPtPhone);
+  DB.push('lbhistory_'+session.phone,{...report,ptName:pt?pt.name:_lbPtPhone});
+  _lbFile=null;renderLbHistory();
+  toast('Report uploaded to patient profile!','s');
+}
+
+function lbShareWhatsApp(phone){
+  const pt=DB.get('patient_'+phone)||{};
+  const msg=`🔬 *LifeCare Diagnostics — Lab Report Ready*\n\nPatient: ${pt.name}\nReport: Your test results have been uploaded to your MediCard profile.\n\nView at: MediCard App\n\n_LifeCare Diagnostics — Govt. Certified_`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+function renderLbHistory(){
+  const hist=DB.get('lbhistory_'+session.phone)||[];
+  const list=document.getElementById('lb-hist-list'),no=document.getElementById('lb-hist-empty');
+  if(hist.length){no.style.display='none';list.innerHTML=[...hist].reverse().map(h=>`<div class="rc"><div class="rch"><div class="rct">📋 ${h.type}</div><div class="rcd">${h.date}</div></div><div class="tags"><span class="tag tl">🔬 ${h.lab}</span><span class="tag td">👤 ${h.ptName||'Patient'}</span></div><div class="rb2">${h.summary?`<strong>Summary:</strong> ${h.summary}<br>`:''} ${h.notes?`<strong>Notes:</strong> ${h.notes}`:''} ${h.file?`<br><strong>File:</strong> ${h.file}`:''}</div></div>`).join('')}
+  else no.style.display='block';
+}
+
+// ─── TOAST ───
+function toast(msg,type='s'){const t=document.getElementById('toast');document.getElementById('toastM').textContent=msg;document.getElementById('toastI').textContent=type==='s'?'✅':type==='e'?'❌':'ℹ️';t.className=`toast ${type} show`;setTimeout(()=>t.classList.remove('show'),3200)}
+</script>
+</body>
+</html>

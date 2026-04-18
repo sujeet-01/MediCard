@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FixIt — Home Services at Your Doorstep</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --orange: #FF5C00;
+    --orange-light: #FF8040;
+    --dark: #0F0D0B;
+    --dark2: #1A1714;
+    --dark3: #242018;
+    --cream: #F5F0E8;
+    --cream2: #EDE8DC;
+    --text-muted: #8A8070;
+    --white: #FFFFFF;
+    --green: #2ECC71;
+    --card-bg: #1E1B17;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--dark);
+    color: var(--cream);
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 5%;
+    background: rgba(15,13,11,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,92,0,0.08);
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem; font-weight: 800;
+    color: var(--white); letter-spacing: -0.03em;
+  }
+  .logo span { color: var(--orange); }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    color: var(--cream2); text-decoration: none;
+    font-size: 0.92rem; font-weight: 400; transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--orange); }
+  .nav-cta {
+    background: var(--orange); color: #fff;
+    border: none; padding: 0.65rem 1.5rem;
+    border-radius: 50px; font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; font-weight: 500; cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .nav-cta:hover { background: var(--orange-light); transform: scale(1.03); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 8rem 5% 5rem;
+    position: relative; overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 60% 60% at 80% 40%, rgba(255,92,0,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(255,92,0,0.06) 0%, transparent 70%);
+  }
+  .hero-grid {
+    position: absolute; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(255,92,0,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,92,0,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .hero-content { position: relative; z-index: 1; max-width: 680px; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(255,92,0,0.12); border: 1px solid rgba(255,92,0,0.3);
+    color: var(--orange); padding: 0.4rem 1rem; border-radius: 50px;
+    font-size: 0.82rem; font-weight: 500; margin-bottom: 1.8rem;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-badge::before { content:'●'; font-size: 0.5rem; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.8rem, 6vw, 5.5rem);
+    font-weight: 800; line-height: 1.0;
+    letter-spacing: -0.04em; color: var(--white);
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  h1 .accent { color: var(--orange); display: block; }
+  .hero-sub {
+    font-size: 1.05rem; color: var(--text-muted);
+    line-height: 1.7; margin: 1.5rem 0 2.5rem;
+    font-weight: 300; max-width: 520px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+  .hero-actions {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+  .btn-primary {
+    background: var(--orange); color: #fff;
+    border: none; padding: 0.9rem 2rem;
+    border-radius: 50px; font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 500; cursor: pointer;
+    transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .btn-primary:hover { background: var(--orange-light); transform: translateY(-2px); box-shadow: 0 12px 30px rgba(255,92,0,0.35); }
+  .btn-outline {
+    background: transparent; color: var(--cream);
+    border: 1px solid rgba(255,240,220,0.2); padding: 0.9rem 2rem;
+    border-radius: 50px; font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 400; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-outline:hover { border-color: var(--orange); color: var(--orange); }
+  .hero-stats {
+    display: flex; gap: 3rem; margin-top: 3.5rem;
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+  .stat-item { }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem; font-weight: 800; color: var(--white);
+  }
+  .stat-num span { color: var(--orange); }
+  .stat-label { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+  /* SEARCH BAR */
+  .search-section {
+    padding: 0 5% 5rem;
+    position: relative; z-index: 1;
+  }
+  .search-box {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px; padding: 1.5rem 2rem;
+    display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;
+    max-width: 900px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+    animation: fadeUp 0.6s 0.5s ease both;
+  }
+  .search-field {
+    flex: 1; min-width: 180px;
+    display: flex; flex-direction: column; gap: 0.3rem;
+  }
+  .search-field label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .search-field select, .search-field input {
+    background: transparent; border: none; outline: none;
+    color: var(--white); font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 400;
+  }
+  .search-field select option { background: var(--dark2); }
+  .search-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.08); }
+  .search-btn {
+    background: var(--orange); border: none; color: #fff;
+    padding: 0.9rem 2rem; border-radius: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 1rem;
+    font-weight: 500; cursor: pointer; transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .search-btn:hover { background: var(--orange-light); transform: scale(1.02); }
+
+  /* SERVICES */
+  .services { padding: 6rem 5%; }
+  .section-label {
+    font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.15em;
+    color: var(--orange); font-weight: 500; margin-bottom: 0.8rem;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 700; color: var(--white);
+    letter-spacing: -0.03em; margin-bottom: 0.8rem;
+  }
+  .section-sub { color: var(--text-muted); font-size: 1rem; max-width: 500px; line-height: 1.7; margin-bottom: 3rem; }
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+  }
+  .service-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 16px; padding: 1.8rem 1.5rem;
+    cursor: pointer; transition: all 0.25s;
+    display: flex; flex-direction: column; gap: 1rem;
+    position: relative; overflow: hidden;
+  }
+  .service-card::before {
+    content: ''; position: absolute;
+    inset: 0; opacity: 0;
+    background: radial-gradient(circle at 30% 30%, rgba(255,92,0,0.12), transparent);
+    transition: opacity 0.3s;
+  }
+  .service-card:hover { border-color: rgba(255,92,0,0.3); transform: translateY(-4px); box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+  .service-card:hover::before { opacity: 1; }
+  .service-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: rgba(255,92,0,0.12);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; transition: background 0.2s;
+  }
+  .service-card:hover .service-icon { background: rgba(255,92,0,0.22); }
+  .service-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem; font-weight: 600; color: var(--white);
+  }
+  .service-count { font-size: 0.8rem; color: var(--text-muted); }
+
+  /* HOW IT WORKS */
+  .how-it-works { padding: 6rem 5%; background: var(--dark2); }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 2rem; margin-top: 3rem; }
+  .step {
+    display: flex; flex-direction: column; gap: 1.2rem;
+    padding: 2rem; border-radius: 20px;
+    background: var(--dark3);
+    border: 1px solid rgba(255,255,255,0.04);
+    position: relative; overflow: hidden;
+    transition: transform 0.2s;
+  }
+  .step:hover { transform: translateY(-4px); }
+  .step-num {
+    font-family: 'Syne', sans-serif; font-size: 4rem;
+    font-weight: 800; color: rgba(255,92,0,0.1);
+    line-height: 1; position: absolute; top: 1rem; right: 1.5rem;
+  }
+  .step-icon {
+    width: 56px; height: 56px; border-radius: 16px;
+    background: rgba(255,92,0,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+  }
+  .step-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--white); }
+  .step-desc { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
+
+  /* WORKERS */
+  .workers { padding: 6rem 5%; }
+  .workers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 1.5rem; margin-top: 3rem; }
+  .worker-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 20px; overflow: hidden;
+    transition: all 0.25s; cursor: pointer;
+  }
+  .worker-card:hover { transform: translateY(-6px); box-shadow: 0 24px 60px rgba(0,0,0,0.4); border-color: rgba(255,92,0,0.2); }
+  .worker-avatar {
+    height: 180px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 4.5rem;
+    background: linear-gradient(135deg, rgba(255,92,0,0.1), rgba(255,92,0,0.03));
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .worker-info { padding: 1.5rem; }
+  .worker-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
+  .worker-name { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--white); }
+  .worker-badge {
+    background: rgba(46,204,113,0.12); color: var(--green);
+    font-size: 0.72rem; padding: 0.25rem 0.6rem; border-radius: 50px;
+    font-weight: 500;
+  }
+  .worker-role { color: var(--orange); font-size: 0.85rem; margin-bottom: 0.8rem; }
+  .worker-meta { display: flex; gap: 1rem; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.2rem; }
+  .worker-meta span { display: flex; align-items: center; gap: 0.3rem; }
+  .worker-price { display: flex; justify-content: space-between; align-items: center; }
+  .price-label { font-size: 0.78rem; color: var(--text-muted); }
+  .price-val { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--white); }
+  .book-btn {
+    background: rgba(255,92,0,0.12); color: var(--orange);
+    border: 1px solid rgba(255,92,0,0.25);
+    padding: 0.5rem 1.1rem; border-radius: 50px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+    font-weight: 500; cursor: pointer; transition: all 0.2s;
+  }
+  .book-btn:hover { background: var(--orange); color: #fff; }
+
+  /* WHY US */
+  .why-us { padding: 6rem 5%; background: var(--dark2); }
+  .why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+  .why-visual {
+    background: var(--dark3); border-radius: 24px;
+    border: 1px solid rgba(255,255,255,0.05);
+    padding: 2.5rem; display: flex; flex-direction: column; gap: 1.5rem;
+  }
+  .why-stat-row { display: flex; gap: 1rem; }
+  .why-stat {
+    flex: 1; background: var(--card-bg); border-radius: 16px;
+    padding: 1.5rem; border: 1px solid rgba(255,255,255,0.05);
+    text-align: center;
+  }
+  .why-stat-num {
+    font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800;
+    color: var(--orange); display: block;
+  }
+  .why-stat-text { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem; }
+  .why-progress { background: var(--card-bg); border-radius: 16px; padding: 1.5rem; border: 1px solid rgba(255,255,255,0.05); }
+  .progress-label { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.6rem; }
+  .progress-bar { height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; margin-bottom: 1rem; }
+  .progress-fill { height: 100%; background: var(--orange); border-radius: 3px; transition: width 1s ease; }
+  .features-list { display: flex; flex-direction: column; gap: 1.2rem; }
+  .feature {
+    display: flex; gap: 1rem; align-items: flex-start;
+    padding: 1.2rem; border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.02);
+    transition: all 0.2s;
+  }
+  .feature:hover { border-color: rgba(255,92,0,0.2); background: rgba(255,92,0,0.04); }
+  .feature-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: rgba(255,92,0,0.12);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; flex-shrink: 0;
+  }
+  .feature-title { font-family: 'Syne', sans-serif; font-size: 0.98rem; font-weight: 600; color: var(--white); margin-bottom: 0.3rem; }
+  .feature-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
+
+  /* TESTIMONIALS */
+  .testimonials { padding: 6rem 5%; }
+  .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 1.5rem; margin-top: 3rem; }
+  .testimonial-card {
+    background: var(--card-bg); border-radius: 20px; padding: 2rem;
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: transform 0.2s;
+  }
+  .testimonial-card:hover { transform: translateY(-4px); }
+  .stars { color: #FFB800; font-size: 1rem; margin-bottom: 1rem; letter-spacing: 2px; }
+  .testimonial-text { color: #C8C0B0; font-size: 0.92rem; line-height: 1.7; margin-bottom: 1.5rem; font-style: italic; }
+  .testimonial-author { display: flex; align-items: center; gap: 1rem; }
+  .author-avatar { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,92,0,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+  .author-name { font-family: 'Syne', sans-serif; font-size: 0.92rem; font-weight: 600; color: var(--white); }
+  .author-meta { font-size: 0.78rem; color: var(--text-muted); }
+
+  /* CTA SECTION */
+  .cta-section {
+    margin: 0 5% 6rem; padding: 5rem;
+    background: linear-gradient(135deg, var(--orange) 0%, #E04500 100%);
+    border-radius: 28px; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .cta-section::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .cta-section h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 800; color: #fff; margin-bottom: 1rem;
+    letter-spacing: -0.03em; position: relative;
+  }
+  .cta-section p { color: rgba(255,255,255,0.8); font-size: 1.05rem; margin-bottom: 2.5rem; max-width: 500px; margin-left: auto; margin-right: auto; position: relative; }
+  .cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; position: relative; }
+  .btn-white {
+    background: #fff; color: var(--orange);
+    border: none; padding: 0.9rem 2rem; border-radius: 50px;
+    font-family: 'DM Sans', sans-serif; font-size: 1rem;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-white:hover { transform: scale(1.03); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+  .btn-transparent {
+    background: rgba(255,255,255,0.15); color: #fff;
+    border: 1px solid rgba(255,255,255,0.3); padding: 0.9rem 2rem;
+    border-radius: 50px; font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 400; cursor: pointer; transition: all 0.2s;
+    backdrop-filter: blur(4px);
+  }
+  .btn-transparent:hover { background: rgba(255,255,255,0.25); }
+
+  /* FOOTER */
+  footer {
+    background: var(--dark2); border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 4rem 5% 2rem;
+  }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
+  .footer-brand .logo { font-size: 1.4rem; display: block; margin-bottom: 1rem; }
+  .footer-brand p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; max-width: 280px; }
+  .footer-col h4 { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 600; color: var(--white); margin-bottom: 1.2rem; }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.7rem; }
+  .footer-col a { color: var(--text-muted); text-decoration: none; font-size: 0.88rem; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--orange); }
+  .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.05); flex-wrap: wrap; gap: 1rem; }
+  .footer-bottom p { color: var(--text-muted); font-size: 0.82rem; }
+  .social-links { display: flex; gap: 0.8rem; }
+  .social-link {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); text-decoration: none; font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  .social-link:hover { background: var(--orange); color: #fff; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+    align-items: center; justify-content: center; padding: 2rem;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--dark2); border-radius: 24px;
+    padding: 2.5rem; width: 100%; max-width: 480px;
+    border: 1px solid rgba(255,255,255,0.08);
+    animation: popIn 0.3s ease;
+  }
+  @keyframes popIn { from { transform: scale(0.9); opacity:0; } to { transform: scale(1); opacity:1; } }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--white); }
+  .modal-close { background: none; border: none; color: var(--text-muted); font-size: 1.3rem; cursor: pointer; padding: 0.3rem; transition: color 0.2s; }
+  .modal-close:hover { color: var(--white); }
+  .form-group { margin-bottom: 1.2rem; }
+  .form-group label { display: block; font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; background: var(--dark3); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; padding: 0.85rem 1rem;
+    color: var(--white); font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem; outline: none; transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--orange); }
+  .form-group select option { background: var(--dark2); }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .submit-btn {
+    width: 100%; background: var(--orange); color: #fff;
+    border: none; padding: 1rem; border-radius: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 1rem;
+    font-weight: 500; cursor: pointer; transition: all 0.2s; margin-top: 0.5rem;
+  }
+  .submit-btn:hover { background: var(--orange-light); transform: translateY(-1px); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in {
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  /* NOTIFICATION */
+  .notification {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 300;
+    background: var(--green); color: #fff;
+    padding: 1rem 1.5rem; border-radius: 14px;
+    font-size: 0.95rem; font-weight: 500;
+    transform: translateY(100px); opacity: 0;
+    transition: all 0.4s ease; display: flex; align-items: center; gap: 0.7rem;
+    box-shadow: 0 10px 30px rgba(46,204,113,0.3);
+  }
+  .notification.show { transform: translateY(0); opacity: 1; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .why-grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .hero-stats { gap: 1.5rem; }
+    .cta-section { padding: 3rem 2rem; }
+    .search-box { flex-direction: column; }
+    .search-divider { display: none; }
+  }
+  @media (max-width: 480px) {
+    .footer-grid { grid-template-columns: 1fr; }
+    .why-stat-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Fix<span>It</span></div>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#how-it-works">How it works</a></li>
+    <li><a href="#workers">Professionals</a></li>
+    <li><a href="#why-us">Why FixIt</a></li>
+  </ul>
+  <button class="nav-cta" onclick="openModal()">Book Now →</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">🟢 Available in your city today</div>
+    <h1>
+      Fix Anything,
+      <span class="accent">Right Now.</span>
+    </h1>
+    <p class="hero-sub">
+      Book verified plumbers, electricians, carpenters, and 20+ home service experts — at your doorstep within 60 minutes.
+    </p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="openModal()">📅 Book a Service &nbsp;→</button>
+      <button class="btn-outline" onclick="document.getElementById('workers').scrollIntoView({behavior:'smooth'})">Meet Our Experts</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num">12<span>K+</span></div>
+        <div class="stat-label">Services Done</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">840<span>+</span></div>
+        <div class="stat-label">Verified Experts</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">4.9<span>★</span></div>
+        <div class="stat-label">Average Rating</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<div class="search-section">
+  <div class="search-box fade-in">
+    <div class="search-field">
+      <label>Service</label>
+      <select>
+        <option>Plumbing</option>
+        <option>Electrical</option>
+        <option>Carpentry</option>
+        <option>AC Repair</option>
+        <option>Painting</option>
+        <option>Cleaning</option>
+        <option>Pest Control</option>
+        <option>Appliance Repair</option>
+      </select>
+    </div>
+    <div class="search-divider"></div>
+    <div class="search-field">
+      <label>Location</label>
+      <input type="text" placeholder="Enter your city or area..."/>
+    </div>
+    <div class="search-divider"></div>
+    <div class="search-field">
+      <label>When</label>
+      <input type="date"/>
+    </div>
+    <button class="search-btn" onclick="openModal()">🔍 Find Experts</button>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section class="services" id="services">
+  <p class="section-label fade-in">What we offer</p>
+  <h2 class="section-title fade-in">20+ Home Services,<br>All in One Place</h2>
+  <p class="section-sub fade-in">From a leaky tap to a full home renovation — we've got a verified expert for every problem.</p>
+  <div class="services-grid">
+    <div class="service-card fade-in" onclick="selectService('Plumbing')">
+      <div class="service-icon">🔧</div>
+      <div>
+        <div class="service-name">Plumbing</div>
+        <div class="service-count">142 experts nearby</div>
+      </div>
+    </div>
+    <div class="service-card fade-in" onclick="selectService('Electrical')">
+      <div class="service-icon">⚡</div>
+      <div>
+        <div class="service-name">Electrical</div>
+        <div class="service-count">98 experts nearby</div>
+      </div>
+    </div>
+    <div class="service-card fade-in" onclick="selectService('AC Repair')">
+      <div class="service-icon">❄️</div>
+      <div>
+        <div class="service-name">AC Repair</div>
+        <div class="service-count">67 experts nearby</div>
+      </div>
+    </div>
+    <div class="service-card fade-in" onclick="selectService('Carpentry')">
+      <div class="service-icon">🪚</div>
+      <div>
+        <div class="service-name">Carpentry</div>
+        <div class="service-count">55 experts nearby</div>
+      </div>
+    </div>
+    <div class="service-card fade-in" onclick="selectService('Painting')">
+      <div class="service-icon">🎨</div>
+      <div>
+        <div class="service-name">Painting</div>
+        <div class="service-count">73 experts nearby</div>
+      </div>
+    </div>
+    <div class="service-card fade-in" onclick="selectService('Deep Cleaning')">
+      <div class="service-icon">🧹</div>
+      <div>
+        <div class="service-name">Deep Cleaning</div>
+        <div class="service-count">88 experts nearby</div>
+      </div>
+    </div>
+    <div class="service-card fade-in" onclick="selectService('Pest Control')">
+      <div class="service-icon">🐜</div>
+      <div>
+        <div class="service-name">Pest Control</div>
+        <div class="service-count">34 experts nearby</div>
+      </div>
+    </div>
+    <div class="service-card fade-in" onclick="selectService('Appliance Repair')">
+      <div class="service-icon">📺</div>
+      <div>
+        <div class="service-name">Appliance Repair</div>
+        <div class="service-count">91 experts nearby</div>
+      </div>
+    </div>
+    <div class="service-card fade-in" onclick="selectService('CCTV/Security')">
+      <div class="service-icon">📷</div>
+      <div>
+        <div class="service-name">CCTV / Security</div>
+        <div class="service-count">29 experts nearby</div>
+      </div>
+    </div>
+    <div class="service-card fade-in" onclick="selectService('Waterproofing')">
+      <div class="service-icon">💧</div>
+      <div>
+        <div class="service-name">Waterproofing</div>
+        <div class="service-count">22 experts nearby</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works" id="how-it-works">
+  <p class="section-label fade-in">Simple process</p>
+  <h2 class="section-title fade-in">Book in Under 2 Minutes</h2>
+  <p class="section-sub fade-in">No calls, no hassle — just pick your service and we handle the rest.</p>
+  <div class="steps">
+    <div class="step fade-in">
+      <div class="step-num">01</div>
+      <div class="step-icon">📍</div>
+      <div class="step-title">Choose Your Service</div>
+      <div class="step-desc">Select from 20+ home services and enter your location. We'll show you verified experts nearby.</div>
+    </div>
+    <div class="step fade-in">
+      <div class="step-num">02</div>
+      <div class="step-icon">📅</div>
+      <div class="step-title">Pick a Time</div>
+      <div class="step-desc">Choose a convenient slot — same day or schedule in advance. Real-time availability shown.</div>
+    </div>
+    <div class="step fade-in">
+      <div class="step-num">03</div>
+      <div class="step-icon">✅</div>
+      <div class="step-title">Get Confirmed</div>
+      <div class="step-desc">Receive an instant SMS & app confirmation with your expert's name, photo, and ETA.</div>
+    </div>
+    <div class="step fade-in">
+      <div class="step-num">04</div>
+      <div class="step-icon">🏠</div>
+      <div class="step-title">Job Done. Pay Later.</div>
+      <div class="step-desc">Expert arrives, completes the work. Pay only after you're satisfied — cash or UPI.</div>
+    </div>
+  </div>
+</section>
+
+<!-- TOP WORKERS -->
+<section class="workers" id="workers">
+  <p class="section-label fade-in">Top professionals</p>
+  <h2 class="section-title fade-in">Meet Our Best Experts</h2>
+  <p class="section-sub fade-in">All workers are police-verified, trained, and rated by hundreds of customers.</p>
+  <div class="workers-grid">
+    <div class="worker-card fade-in">
+      <div class="worker-avatar">👨‍🔧</div>
+      <div class="worker-info">
+        <div class="worker-top">
+          <div class="worker-name">Ramesh Kumar</div>
+          <span class="worker-badge">✓ Verified</span>
+        </div>
+        <div class="worker-role">Master Plumber</div>
+        <div class="worker-meta">
+          <span>⭐ 4.9 (312 jobs)</span>
+          <span>📍 2.3 km</span>
+        </div>
+        <div class="worker-price">
+          <div>
+            <div class="price-label">Starting at</div>
+            <div class="price-val">₹299</div>
+          </div>
+          <button class="book-btn" onclick="openModal()">Book Now</button>
+        </div>
+      </div>
+    </div>
+    <div class="worker-card fade-in">
+      <div class="worker-avatar">👷</div>
+      <div class="worker-info">
+        <div class="worker-top">
+          <div class="worker-name">Suresh Yadav</div>
+          <span class="worker-badge">✓ Verified</span>
+        </div>
+        <div class="worker-role">Electrician</div>
+        <div class="worker-meta">
+          <span>⭐ 4.8 (278 jobs)</span>
+          <span>📍 1.8 km</span>
+        </div>
+        <div class="worker-price">
+          <div>
+            <div class="price-label">Starting at</div>
+            <div class="price-val">₹249</div>
+          </div>
+          <button class="book-btn" onclick="openModal()">Book Now</button>
+        </div>
+      </div>
+    </div>
+    <div class="worker-card fade-in">
+      <div class="worker-avatar">🧑‍🔬</div>
+      <div class="worker-info">
+        <div class="worker-top">
+          <div class="worker-name">Anil Sharma</div>
+          <span class="worker-badge">✓ Verified</span>
+        </div>
+        <div class="worker-role">AC Technician</div>
+        <div class="worker-meta">
+          <span>⭐ 5.0 (189 jobs)</span>
+          <span>📍 3.1 km</span>
+        </div>
+        <div class="worker-price">
+          <div>
+            <div class="price-label">Starting at</div>
+            <div class="price-val">₹399</div>
+          </div>
+          <button class="book-btn" onclick="openModal()">Book Now</button>
+        </div>
+      </div>
+    </div>
+    <div class="worker-card fade-in">
+      <div class="worker-avatar">🪚</div>
+      <div class="worker-info">
+        <div class="worker-top">
+          <div class="worker-name">Mohan Das</div>
+          <span class="worker-badge">✓ Verified</span>
+        </div>
+        <div class="worker-role">Carpenter</div>
+        <div class="worker-meta">
+          <span>⭐ 4.7 (231 jobs)</span>
+          <span>📍 4.0 km</span>
+        </div>
+        <div class="worker-price">
+          <div>
+            <div class="price-label">Starting at</div>
+            <div class="price-val">₹350</div>
+          </div>
+          <button class="book-btn" onclick="openModal()">Book Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section class="why-us" id="why-us">
+  <div class="why-grid">
+    <div>
+      <p class="section-label fade-in">Why FixIt</p>
+      <h2 class="section-title fade-in">Better Than the Rest,<br>Here's Why</h2>
+      <p class="section-sub fade-in">We fix the problems other platforms ignore — no more ghosting workers, surprise bills, or fake reviews.</p>
+      <div class="features-list">
+        <div class="feature fade-in">
+          <div class="feature-icon">🛡️</div>
+          <div>
+            <div class="feature-title">Police-Verified Workers</div>
+            <div class="feature-desc">Every expert undergoes background verification before they're listed. Your safety is non-negotiable.</div>
+          </div>
+        </div>
+        <div class="feature fade-in">
+          <div class="feature-icon">💸</div>
+          <div>
+            <div class="feature-title">Pay After Satisfaction</div>
+            <div class="feature-desc">You only pay when the job is done to your liking. Instant refunds if something goes wrong.</div>
+          </div>
+        </div>
+        <div class="feature fade-in">
+          <div class="feature-icon">📞</div>
+          <div>
+            <div class="feature-title">24/7 Live Support</div>
+            <div class="feature-desc">Real humans, not bots. Reach us via call, chat, or WhatsApp anytime — even on holidays.</div>
+          </div>
+        </div>
+        <div class="feature fade-in">
+          <div class="feature-icon">🌍</div>
+          <div>
+            <div class="feature-title">Hindi & Local Languages</div>
+            <div class="feature-desc">Book in Hindi, Tamil, Telugu, or Marathi. We serve Tier 2 & 3 cities that others ignore.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="why-visual fade-in">
+      <div class="why-stat-row">
+        <div class="why-stat">
+          <span class="why-stat-num">98%</span>
+          <div class="why-stat-text">On-time arrival</div>
+        </div>
+        <div class="why-stat">
+          <span class="why-stat-num">4.9★</span>
+          <div class="why-stat-text">Average rating</div>
+        </div>
+      </div>
+      <div class="why-progress">
+        <div>
+          <div class="progress-label"><span>Customer Satisfaction</span><span style="color:var(--orange)">96%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:96%"></div></div>
+        </div>
+        <div>
+          <div class="progress-label"><span>On-time Completion</span><span style="color:var(--orange)">98%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:98%"></div></div>
+        </div>
+        <div>
+          <div class="progress-label"><span>Issue Resolution Rate</span><span style="color:var(--orange)">99%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:99%"></div></div>
+        </div>
+      </div>
+      <div class="why-stat-row">
+        <div class="why-stat">
+          <span class="why-stat-num">60min</span>
+          <div class="why-stat-text">Emergency response</div>
+        </div>
+        <div class="why-stat">
+          <span class="why-stat-num">0</span>
+          <div class="why-stat-text">Hidden charges</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <p class="section-label fade-in">Real reviews</p>
+  <h2 class="section-title fade-in">What Our Customers Say</h2>
+  <div class="testimonials-grid">
+    <div class="testimonial-card fade-in">
+      <div class="stars">★★★★★</div>
+      <p class="testimonial-text">"Booked a plumber at 11 PM for a burst pipe emergency. He arrived in 45 minutes. Absolutely life-saving service. No other app came close."</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">👩</div>
+        <div>
+          <div class="author-name">Priya Agarwal</div>
+          <div class="author-meta">Ghaziabad · Plumbing</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card fade-in">
+      <div class="stars">★★★★★</div>
+      <p class="testimonial-text">"Finally an app that actually works in our city! Got an electrician within 2 hours. Transparent pricing, no surprise bills. Will use again."</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">👨</div>
+        <div>
+          <div class="author-name">Rohit Verma</div>
+          <div class="author-meta">Meerut · Electrical</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card fade-in">
+      <div class="stars">★★★★☆</div>
+      <p class="testimonial-text">"AC was not working in peak summer. FixIt sent a technician the same afternoon. He fixed it in an hour. The pay-after service policy is brilliant."</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">👩</div>
+        <div>
+          <div class="author-name">Sunita Mishra</div>
+          <div class="author-meta">Lucknow · AC Repair</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2>Got a problem at home?<br>We'll fix it today. 🔧</h2>
+  <p>Join 12,000+ happy homes across India. Book your first service and get ₹100 off.</p>
+  <div class="cta-buttons">
+    <button class="btn-white" onclick="openModal()">📅 Book a Service Now</button>
+    <button class="btn-transparent">📲 Download the App</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <span class="logo">Fix<span>It</span></span>
+      <p>India's most trusted home services platform. Verified experts, transparent pricing, and zero hassle — available in 50+ cities.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Services</h4>
+      <ul>
+        <li><a href="#">Plumbing</a></li>
+        <li><a href="#">Electrical</a></li>
+        <li><a href="#">AC Repair</a></li>
+        <li><a href="#">Carpentry</a></li>
+        <li><a href="#">Painting</a></li>
+        <li><a href="#">Deep Cleaning</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">How It Works</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Press</a></li>
+        <li><a href="#">Blog</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Help Center</a></li>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Refund Policy</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 FixIt Technologies Pvt. Ltd. · Made with ❤️ in India</p>
+    <div class="social-links">
+      <a class="social-link" href="#">𝕏</a>
+      <a class="social-link" href="#">in</a>
+      <a class="social-link" href="#">f</a>
+      <a class="social-link" href="#">▶</a>
+    </div>
+  </div>
+</footer>
+
+<!-- BOOKING MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📅 Book a Service</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Service Type</label>
+      <select id="modal-service">
+        <option>Plumbing</option>
+        <option>Electrical</option>
+        <option>AC Repair</option>
+        <option>Carpentry</option>
+        <option>Painting</option>
+        <option>Deep Cleaning</option>
+        <option>Pest Control</option>
+        <option>Appliance Repair</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Your Name</label>
+        <input type="text" placeholder="Rahul Sharma"/>
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" placeholder="+91 9876543210"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Address</label>
+      <input type="text" placeholder="Sector 5, Vaishali, Ghaziabad"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date"/>
+      </div>
+      <div class="form-group">
+        <label>Time Slot</label>
+        <select>
+          <option>9 AM – 11 AM</option>
+          <option>11 AM – 1 PM</option>
+          <option>1 PM – 3 PM</option>
+          <option>3 PM – 5 PM</option>
+          <option>5 PM – 7 PM</option>
+          <option>🚨 Emergency (60 min)</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Describe the Problem (optional)</label>
+      <textarea placeholder="E.g. Kitchen tap is leaking, needs replacement..."></textarea>
+    </div>
+    <button class="submit-btn" onclick="submitBooking()">Confirm Booking →</button>
+  </div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notification" id="notification">
+  ✅ Booking confirmed! Expert assigned. ETA: 45 mins.
+</div>
+
+<script>
+  // Scroll animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Modal
+  function openModal(service) {
+    document.getElementById('modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    if (service) document.getElementById('modal-service').value = service;
+  }
+  function closeModal() {
+    document.getElementById('modal').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('modal')) closeModal();
+  });
+
+  function selectService(name) {
+    openModal(name);
+  }
+
+  // Booking submit
+  function submitBooking() {
+    closeModal();
+    const notif = document.getElementById('notification');
+    notif.classList.add('show');
+    setTimeout(() => notif.classList.remove('show'), 4000);
+  }
+</script>
+</body>
+</html>
