@@ -1,0 +1,2124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MediCard — Digital Health Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+
+  <style>
+    /* ═══════════════════════════════════════════
+       DESIGN TOKENS
+    ═══════════════════════════════════════════ */
+    :root {
+      --bg:     #030d18;  --bg2:    #071422;  --bg3:    #0b1e35;
+      --cyan:   #00d4ff;  --teal:   #00b4a0;  --green:  #00e676;
+      --red:    #ff4560;  --amber:  #ffab00;  --purple: #7c4dff;
+      --lime:   #b2ff59;
+      --t1:     #e8f4fd;  --t2:     #7fa8c9;  --t3:     #3d6080;
+      --border: rgba(0,212,255,0.12);
+      --glow:   0 0 24px rgba(0,212,255,0.3);
+      --r:      14px;
+    }
+
+    /* ═══════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════ */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--t1); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-thumb { background: var(--t3); border-radius: 4px; }
+    input[type="file"] { display: none; }
+    a { color: var(--cyan); }
+
+    /* ═══════════════════════════════════════════
+       ANIMATED BACKGROUND
+    ═══════════════════════════════════════════ */
+    .bg-grid {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image: linear-gradient(rgba(0,212,255,.025) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(0,212,255,.025) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+    .orb { position: fixed; border-radius: 50%; filter: blur(90px); pointer-events: none; z-index: 0; }
+    .orb-1 { width:600px; height:600px; background:radial-gradient(circle,rgba(0,180,160,.1),transparent); top:-150px; right:-150px; animation:orb-float 9s ease-in-out infinite; }
+    .orb-2 { width:500px; height:500px; background:radial-gradient(circle,rgba(0,212,255,.07),transparent); bottom:-100px; left:-100px; animation:orb-float 11s ease-in-out infinite reverse; }
+    @keyframes orb-float { 0%,100%{transform:translate(0,0)} 50%{transform:translate(40px,-40px)} }
+
+    /* ═══════════════════════════════════════════
+       NAVBAR
+    ═══════════════════════════════════════════ */
+    nav { position:fixed; top:0; left:0; right:0; z-index:200; background:rgba(3,13,24,.9); backdrop-filter:blur(24px); border-bottom:1px solid var(--border); }
+    .nav-inner { max-width:1440px; margin:0 auto; height:62px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; }
+    .logo { display:flex; align-items:center; gap:10px; cursor:pointer; text-decoration:none; }
+    .logo-icon { width:38px; height:38px; background:linear-gradient(135deg,var(--cyan),var(--teal)); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; box-shadow:var(--glow); animation:heartbeat 2s ease-in-out infinite; }
+    @keyframes heartbeat { 0%,100%{transform:scale(1)} 40%{transform:scale(1.08)} 70%{transform:scale(1)} }
+    .logo-name { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; background:linear-gradient(90deg,var(--cyan),var(--teal)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .logo-sub { font-size:9px; color:var(--t3); letter-spacing:2px; text-transform:uppercase; }
+    .nav-btns { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+    .nav-btn { padding:7px 14px; border-radius:8px; border:1px solid; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; letter-spacing:.5px; transition:all .25s; display:flex; align-items:center; gap:6px; background:transparent; }
+    .nb-pt  { color:var(--cyan);   border-color:rgba(0,212,255,.3);  } .nb-pt:hover  { background:var(--cyan);   color:#000; }
+    .nb-dr  { color:var(--teal);   border-color:rgba(0,180,160,.3);  } .nb-dr:hover  { background:var(--teal);   color:#000; }
+    .nb-lb  { color:var(--amber);  border-color:rgba(255,171,0,.3);  } .nb-lb:hover  { background:var(--amber);  color:#000; }
+    .nb-ph  { color:var(--lime);   border-color:rgba(178,255,89,.3); } .nb-ph:hover  { background:var(--lime);   color:#000; }
+    .nb-em  { color:var(--red);    border-color:rgba(255,69,96,.5);  background:rgba(255,69,96,.1); animation:em-pulse 1.5s ease-in-out infinite; }
+    .nb-lo  { color:var(--red);    border-color:rgba(255,69,96,.3);  } .nb-lo:hover  { background:var(--red);    color:#fff; }
+    @keyframes em-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,69,96,.4)} 50%{box-shadow:0 0 0 6px rgba(255,69,96,0)} }
+    .nav-dot { width:7px; height:7px; border-radius:50%; background:currentColor; animation:dot-p 1.5s ease-in-out infinite; }
+    @keyframes dot-p { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.6)} }
+
+    /* ═══════════════════════════════════════════
+       LAYOUT
+    ═══════════════════════════════════════════ */
+    .page { position:relative; z-index:1; padding-top:62px; min-height:100vh; }
+    .container { max-width:1400px; margin:0 auto; padding:22px 20px; }
+
+    /* ═══════════════════════════════════════════
+       LANDING / HERO
+    ═══════════════════════════════════════════ */
+    .hero { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:80px 20px 40px; position:relative; }
+    .ecg-line { position:absolute; top:50%; left:0; right:0; transform:translateY(-50%); opacity:.12; pointer-events:none; }
+    .ecg-path { stroke:var(--cyan); stroke-width:2; fill:none; stroke-dasharray:3000; stroke-dashoffset:3000; animation:draw-ecg 4s linear infinite; }
+    @keyframes draw-ecg { to { stroke-dashoffset:-3000; } }
+    .hero-badge { display:inline-flex; align-items:center; gap:7px; padding:5px 14px; background:rgba(0,212,255,.08); border:1px solid rgba(0,212,255,.25); border-radius:100px; font-size:11px; color:var(--cyan); letter-spacing:1px; text-transform:uppercase; margin-bottom:28px; animation:fade-up .5s ease both; }
+    .hero-title { font-family:'Syne',sans-serif; font-size:clamp(48px,9vw,100px); font-weight:800; line-height:.95; margin-bottom:18px; animation:fade-up .5s ease .1s both; }
+    .hero-title .line1 { display:block; color:#fff; }
+    .hero-title .line2 { display:block; background:linear-gradient(90deg,var(--cyan),var(--teal)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .hero-sub { font-size:17px; color:var(--t2); max-width:580px; line-height:1.75; margin-bottom:44px; animation:fade-up .5s ease .2s both; }
+    .hero-btns { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; animation:fade-up .5s ease .3s both; }
+    @keyframes fade-up { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+    .cta { padding:14px 36px; border-radius:12px; border:none; cursor:pointer; font-family:'Syne',sans-serif; font-size:16px; font-weight:700; letter-spacing:.8px; transition:all .3s; }
+    .cta-p  { background:linear-gradient(135deg,var(--cyan),var(--teal)); color:#000; box-shadow:0 4px 28px rgba(0,212,255,.35); } .cta-p:hover  { transform:translateY(-2px); box-shadow:0 8px 36px rgba(0,212,255,.55); }
+    .cta-c  { background:transparent; color:var(--cyan);  border:2px solid rgba(0,212,255,.35); }  .cta-c:hover  { background:rgba(0,212,255,.08); }
+    .cta-a  { background:transparent; color:var(--amber); border:2px solid rgba(255,171,0,.35); }  .cta-a:hover  { background:rgba(255,171,0,.08); }
+    .cta-l  { background:transparent; color:var(--lime);  border:2px solid rgba(178,255,89,.35); } .cta-l:hover  { background:rgba(178,255,89,.08); }
+
+    /* Stats bar */
+    .stats-bar { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:28px 20px; }
+    .stats-grid { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:repeat(5,1fr); text-align:center; gap:20px; }
+    .stat-num { font-family:'Syne',sans-serif; font-size:34px; font-weight:800; background:linear-gradient(90deg,var(--cyan),var(--teal)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .stat-lbl { font-size:12px; color:var(--t2); margin-top:3px; }
+
+    /* Feature cards */
+    .feat-sec { max-width:1200px; margin:0 auto; padding:72px 20px; }
+    .sec-t { font-family:'Syne',sans-serif; font-size:36px; font-weight:800; text-align:center; margin-bottom:6px; background:linear-gradient(90deg,var(--cyan),var(--teal)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .sec-s { text-align:center; color:var(--t2); margin-bottom:44px; font-size:15px; }
+    .feat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; }
+    .feat-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--r); padding:26px; transition:all .3s; position:relative; overflow:hidden; }
+    .feat-card::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(0,212,255,.04),transparent); opacity:0; transition:opacity .3s; }
+    .feat-card:hover { transform:translateY(-4px); border-color:rgba(0,212,255,.35); box-shadow:var(--glow); }
+    .feat-card:hover::after { opacity:1; }
+    .feat-icon { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:14px; }
+    .feat-card h3 { font-family:'Syne',sans-serif; font-size:17px; font-weight:700; margin-bottom:6px; }
+    .feat-card p  { font-size:13px; color:var(--t2); line-height:1.6; }
+
+    /* ═══════════════════════════════════════════
+       DASHBOARD SHELL
+    ═══════════════════════════════════════════ */
+    .dash-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; padding:18px 22px; background:var(--bg2); border:1px solid var(--border); border-radius:var(--r); flex-wrap:wrap; gap:12px; }
+    .dash-welcome { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; }
+    .dash-welcome span { background:linear-gradient(90deg,var(--cyan),var(--teal)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .dash-meta { font-size:12px; color:var(--t2); margin-top:3px; }
+    .role-badge { padding:5px 14px; border-radius:100px; font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; }
+    .rb-pt { background:rgba(0,212,255,.12);  color:var(--cyan);   border:1px solid rgba(0,212,255,.25); }
+    .rb-dr { background:rgba(0,180,160,.12);  color:var(--teal);   border:1px solid rgba(0,180,160,.25); }
+    .rb-lb { background:rgba(255,171,0,.12);  color:var(--amber);  border:1px solid rgba(255,171,0,.25); }
+    .rb-ph { background:rgba(178,255,89,.12); color:var(--lime);   border:1px solid rgba(178,255,89,.25); }
+    .vbadge { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:700; padding:3px 9px; border-radius:100px; background:rgba(0,230,118,.1); color:var(--green); border:1px solid rgba(0,230,118,.2); }
+
+    /* Tabs */
+    .dash-tabs { display:flex; gap:4px; margin-bottom:22px; overflow-x:auto; padding-bottom:4px; }
+    .dash-tab { padding:9px 18px; border-radius:10px; border:1px solid transparent; background:transparent; color:var(--t2); cursor:pointer; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; white-space:nowrap; transition:all .2s; }
+    .dash-tab.active { background:var(--bg2); border-color:var(--border); color:var(--t1); }
+    .dash-tab:hover  { color:var(--t1); background:rgba(255,255,255,.03); }
+
+    /* ═══════════════════════════════════════════
+       CARDS
+    ═══════════════════════════════════════════ */
+    .card   { background:var(--bg2); border:1px solid var(--border); border-radius:var(--r); padding:22px; transition:all .2s; }
+    .card:hover { border-color:rgba(0,212,255,.25); }
+    .panel  { background:var(--bg3); border:1px solid var(--border); border-radius:var(--r); padding:20px; }
+    .info-banner  { background:rgba(0,212,255,.04); border:1px solid rgba(0,212,255,.15); border-radius:12px; padding:12px 16px; margin-bottom:14px; font-size:13px; color:var(--t2); }
+    .warn-banner  { background:rgba(255,69,96,.06); border:1px solid rgba(255,69,96,.3); border-radius:12px; padding:14px 18px; display:flex; align-items:center; gap:12px; font-size:13px; margin-bottom:14px; }
+
+    /* Metric cards */
+    .metrics-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:22px; }
+    .metric-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--r); padding:18px; display:flex; align-items:center; gap:14px; }
+    .metric-icon { width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+    .metric-val  { font-family:'Syne',sans-serif; font-size:26px; font-weight:800; line-height:1; }
+    .metric-lbl  { font-size:11px; color:var(--t2); margin-top:2px; }
+
+    /* Record cards */
+    .record-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--r); padding:18px; margin-bottom:10px; transition:all .2s; }
+    .record-card:hover { border-color:rgba(0,212,255,.25); }
+    .record-title { font-family:'Syne',sans-serif; font-size:17px; font-weight:700; }
+    .record-date  { font-size:11px; color:var(--t2); font-family:'JetBrains Mono',monospace; }
+    .record-body  { font-size:13px; color:var(--t2); line-height:1.6; }
+    .record-body strong { color:var(--t1); }
+    .record-rx    { margin-top:10px; padding:11px; background:rgba(0,230,118,.05); border:1px solid rgba(0,230,118,.15); border-radius:10px; font-size:12px; color:#80ffbb; }
+    .tags-row     { display:flex; gap:5px; flex-wrap:wrap; margin:8px 0; }
+    .tag { padding:2px 9px; border-radius:100px; font-size:11px; font-weight:600; }
+    .tag-red    { background:rgba(255,69,96,.12);  color:var(--red);   border:1px solid rgba(255,69,96,.2); }
+    .tag-amber  { background:rgba(255,171,0,.12);  color:var(--amber); border:1px solid rgba(255,171,0,.2); }
+    .tag-cyan   { background:rgba(0,212,255,.08);  color:var(--cyan);  border:1px solid rgba(0,212,255,.18); }
+    .tag-green  { background:rgba(0,230,118,.12);  color:var(--green); border:1px solid rgba(0,230,118,.2); }
+    .tag-purple { background:rgba(124,77,255,.1);  color:#b39ddb;      border:1px solid rgba(124,77,255,.2); }
+    .tag-lime   { background:rgba(178,255,89,.1);  color:var(--lime);  border:1px solid rgba(178,255,89,.2); }
+
+    /* ═══════════════════════════════════════════
+       FORMS
+    ═══════════════════════════════════════════ */
+    .form-group { margin-bottom:14px; }
+    .form-label { display:block; font-size:11px; color:var(--t2); letter-spacing:.8px; text-transform:uppercase; margin-bottom:5px; font-weight:500; }
+    .form-input  { width:100%; padding:11px 14px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09); border-radius:10px; color:var(--t1); font-family:'DM Sans',sans-serif; font-size:14px; transition:all .2s; outline:none; }
+    .form-input:focus { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(0,212,255,.1); }
+    .form-input::placeholder { color:var(--t3); }
+    select.form-input option { background:var(--bg3); }
+    .form-row      { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .form-textarea { resize:vertical; min-height:70px; }
+
+    /* ═══════════════════════════════════════════
+       BUTTONS
+    ═══════════════════════════════════════════ */
+    .btn { padding:11px 24px; border-radius:10px; border:none; cursor:pointer; font-family:'Syne',sans-serif; font-size:15px; font-weight:700; letter-spacing:.5px; transition:all .25s; display:inline-flex; align-items:center; gap:7px; }
+    .btn-full { width:100%; justify-content:center; }
+    .btn-sm   { padding:7px 14px; font-size:12px; border-radius:8px; }
+    .btn-cyan   { background:linear-gradient(135deg,var(--cyan),var(--teal)); color:#000; } .btn-cyan:hover   { transform:translateY(-1px); box-shadow:var(--glow); }
+    .btn-teal   { background:linear-gradient(135deg,var(--teal),#006d62);    color:#fff; }
+    .btn-amber  { background:linear-gradient(135deg,var(--amber),#e65100);   color:#000; }
+    .btn-lime   { background:linear-gradient(135deg,var(--lime),#76c442);    color:#000; }
+    .btn-red    { background:linear-gradient(135deg,var(--red),#b71c1c);     color:#fff; }
+    .btn-ghost  { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); color:var(--t1); } .btn-ghost:hover { background:rgba(255,255,255,.1); }
+    .btn-purple { background:linear-gradient(135deg,var(--purple),#4527a0); color:#fff; }
+    .ob-cyan   { background:rgba(0,212,255,.08);  border:1px solid rgba(0,212,255,.25);  color:var(--cyan);  border-radius:8px; } .ob-cyan:hover   { background:var(--cyan);   color:#000; }
+    .ob-teal   { background:rgba(0,180,160,.08);  border:1px solid rgba(0,180,160,.25);  color:var(--teal);  border-radius:8px; } .ob-teal:hover   { background:var(--teal);   color:#000; }
+    .ob-amber  { background:rgba(255,171,0,.08);  border:1px solid rgba(255,171,0,.25);  color:var(--amber); border-radius:8px; } .ob-amber:hover  { background:var(--amber);  color:#000; }
+    .ob-lime   { background:rgba(178,255,89,.08); border:1px solid rgba(178,255,89,.25); color:var(--lime);  border-radius:8px; } .ob-lime:hover   { background:var(--lime);   color:#000; }
+    .ob-red    { background:rgba(255,69,96,.08);  border:1px solid rgba(255,69,96,.25);  color:var(--red);   border-radius:8px; } .ob-red:hover    { background:var(--red);    color:#fff; }
+
+    /* ═══════════════════════════════════════════
+       SEARCH
+    ═══════════════════════════════════════════ */
+    .search-panel { background:var(--bg2); border:1px solid var(--border); border-radius:var(--r); padding:22px; margin-bottom:18px; }
+    .search-bar   { display:flex; gap:10px; }
+    .search-input { flex:1; padding:11px 18px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09); border-radius:10px; color:var(--t1); font-family:'DM Sans',sans-serif; font-size:14px; outline:none; transition:all .2s; }
+    .search-input:focus { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(0,212,255,.1); }
+
+    /* Section header */
+    .sec-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+    .sec-hdr h2 { font-family:'Syne',sans-serif; font-size:20px; font-weight:700; display:flex; align-items:center; gap:7px; }
+
+    /* ═══════════════════════════════════════════
+       PROFILE
+    ═══════════════════════════════════════════ */
+    .profile-layout  { display:grid; grid-template-columns:280px 1fr; gap:18px; }
+    .profile-sidebar { background:var(--bg2); border:1px solid var(--border); border-radius:var(--r); padding:24px; text-align:center; }
+    .profile-avatar  { width:76px; height:76px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px; margin:0 auto 14px; box-shadow:var(--glow); }
+    .profile-name    { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; margin-bottom:3px; }
+    .profile-detail  { font-size:12px; color:var(--t2); margin-bottom:6px; }
+    .profile-fields  { background:var(--bg2); border:1px solid var(--border); border-radius:var(--r); padding:24px; }
+    .fields-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:14px; }
+    .field-item  { padding:12px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:10px; }
+    .field-key   { font-size:10px; color:var(--t3); letter-spacing:.8px; text-transform:uppercase; margin-bottom:3px; }
+    .field-value { font-size:14px; font-weight:500; }
+
+    /* ═══════════════════════════════════════════
+       APPOINTMENTS
+    ═══════════════════════════════════════════ */
+    .appt-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; }
+    .appt-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--r); padding:18px; transition:all .2s; }
+    .appt-card:hover { border-color:rgba(0,212,255,.25); }
+    .appt-time { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--cyan); margin-bottom:5px; }
+    .appt-doc  { font-family:'Syne',sans-serif; font-size:17px; font-weight:700; margin-bottom:3px; }
+    .appt-status { display:inline-block; padding:3px 9px; border-radius:100px; font-size:10px; font-weight:700; }
+    .s-conf { background:rgba(0,230,118,.12); color:var(--green); }
+    .s-pend { background:rgba(255,171,0,.12);  color:var(--amber); }
+
+    /* ═══════════════════════════════════════════
+       CHARTS
+    ═══════════════════════════════════════════ */
+    .chart-card  { background:var(--bg2); border:1px solid var(--border); border-radius:var(--r); padding:22px; margin-bottom:18px; }
+    .chart-title { font-family:'Syne',sans-serif; font-size:17px; font-weight:700; margin-bottom:14px; }
+    .chart-wrap  { height:200px; position:relative; }
+    .vitals-log  { display:grid; grid-template-columns:1fr 1fr auto; gap:10px; margin-top:14px; align-items:flex-end; padding:14px; background:rgba(255,255,255,.02); border-radius:10px; border:1px solid var(--border); }
+
+    /* ═══════════════════════════════════════════
+       CHATBOT
+    ═══════════════════════════════════════════ */
+    .chatbot { height:calc(100vh - 220px); min-height:480px; display:flex; flex-direction:column; background:var(--bg2); border:1px solid var(--border); border-radius:var(--r); overflow:hidden; }
+    .chat-hdr  { padding:14px 18px; background:rgba(0,212,255,.06); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; }
+    .ai-icon   { width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,var(--cyan),var(--purple)); display:flex; align-items:center; justify-content:center; font-size:18px; }
+    .chat-msgs { flex:1; overflow-y:auto; padding:18px; display:flex; flex-direction:column; gap:12px; scroll-behavior:smooth; }
+    .chat-msg  { max-width:75%; display:flex; flex-direction:column; }
+    .chat-msg.user { align-self:flex-end; align-items:flex-end; }
+    .chat-msg.ai   { align-self:flex-start; }
+    .chat-bubble   { padding:11px 15px; border-radius:14px; font-size:13px; line-height:1.65; }
+    .chat-msg.user .chat-bubble { background:linear-gradient(135deg,rgba(0,212,255,.18),rgba(0,180,160,.18)); border:1px solid rgba(0,212,255,.18); }
+    .chat-msg.ai   .chat-bubble { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); }
+    .chat-time { font-size:10px; color:var(--t3); margin-top:3px; font-family:'JetBrains Mono',monospace; }
+    .chat-sugs { display:flex; gap:7px; flex-wrap:wrap; padding:7px 14px; border-top:1px solid var(--border); }
+    .chat-sug  { padding:5px 11px; border-radius:100px; background:rgba(0,212,255,.06); border:1px solid rgba(0,212,255,.18); color:var(--cyan); font-size:11px; cursor:pointer; transition:all .2s; white-space:nowrap; } .chat-sug:hover { background:rgba(0,212,255,.14); }
+    .chat-inp-row { padding:14px; border-top:1px solid var(--border); display:flex; gap:8px; }
+    .chat-inp { flex:1; padding:11px 14px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09); border-radius:12px; color:var(--t1); font-family:'DM Sans',sans-serif; font-size:13px; outline:none; resize:none; max-height:90px; transition:all .2s; } .chat-inp:focus { border-color:var(--cyan); }
+    .chat-send { width:42px; height:42px; border-radius:10px; background:linear-gradient(135deg,var(--cyan),var(--teal)); border:none; color:#000; cursor:pointer; font-size:16px; flex-shrink:0; transition:all .2s; } .chat-send:hover { transform:scale(1.05); box-shadow:var(--glow); }
+    .typing-dots span { display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--t2); margin:0 2px; animation:typing 1.2s ease-in-out infinite; }
+    .typing-dots span:nth-child(2) { animation-delay:.2s; }
+    .typing-dots span:nth-child(3) { animation-delay:.4s; }
+    @keyframes typing { 0%,60%,100%{transform:translateY(0);opacity:.4} 30%{transform:translateY(-6px);opacity:1} }
+
+    /* ═══════════════════════════════════════════
+       OTP
+    ═══════════════════════════════════════════ */
+    .otp-wrap { display:flex; gap:10px; justify-content:center; margin:16px 0; }
+    .otp-box  { width:52px; height:56px; background:rgba(255,255,255,.05); border:2px solid rgba(255,255,255,.1); border-radius:12px; text-align:center; font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:600; color:var(--cyan); outline:none; transition:all .2s; }
+    .otp-box:focus { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(0,212,255,.15); }
+    .otp-hint { text-align:center; font-size:13px; color:var(--t2); margin-bottom:12px; }
+    .otp-hint span { color:var(--cyan); font-weight:600; }
+
+    /* ═══════════════════════════════════════════
+       MODAL
+    ═══════════════════════════════════════════ */
+    .modal-overlay { position:fixed; inset:0; background:rgba(3,13,24,.92); backdrop-filter:blur(10px); z-index:500; display:flex; align-items:center; justify-content:center; padding:16px; }
+    .modal-box     { background:var(--bg3); border:1px solid var(--border); border-radius:20px; padding:36px; width:100%; max-width:500px; position:relative; max-height:92vh; overflow-y:auto; animation:modal-in .25s ease; }
+    @keyframes modal-in { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+    .modal-close   { position:absolute; top:14px; right:14px; width:30px; height:30px; border-radius:8px; background:rgba(255,255,255,.05); border:none; color:var(--t2); cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; transition:all .2s; } .modal-close:hover { background:rgba(255,69,96,.2); color:var(--red); }
+    .modal-title    { font-family:'Syne',sans-serif; font-size:26px; font-weight:800; margin-bottom:3px; }
+    .modal-subtitle { font-size:13px; color:var(--t2); margin-bottom:24px; }
+    .tab-sw  { display:flex; background:rgba(255,255,255,.04); border-radius:10px; padding:3px; margin-bottom:22px; gap:3px; }
+    .tab-sw-btn { flex:1; padding:8px; border:none; background:transparent; color:var(--t2); border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; transition:all .2s; }
+    .tab-sw-btn.active { background:var(--cyan); color:#000; }
+
+    /* ═══════════════════════════════════════════
+       EMERGENCY
+    ═══════════════════════════════════════════ */
+    .em-overlay  { position:fixed; inset:0; background:rgba(10,0,0,.97); z-index:999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
+    .em-pulse    { width:80px; height:80px; background:var(--red); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:36px; margin:0 auto 16px; animation:em-anim 1s ease-in-out infinite; }
+    @keyframes em-anim { 0%{box-shadow:0 0 0 0 rgba(255,69,96,.7)} 70%{box-shadow:0 0 0 20px rgba(255,69,96,0)} 100%{box-shadow:0 0 0 0 rgba(255,69,96,0)} }
+    .em-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; width:100%; max-width:800px; margin-bottom:24px; }
+    .em-card { background:rgba(255,255,255,.05); border:2px solid rgba(255,255,255,.1); border-radius:16px; padding:22px; text-align:center; }
+    .em-val  { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; }
+
+    /* ═══════════════════════════════════════════
+       PHARMACIST — INVENTORY TABLE
+    ═══════════════════════════════════════════ */
+    .inv-table { width:100%; border-collapse:collapse; }
+    .inv-table th { padding:10px 14px; text-align:left; font-size:11px; color:var(--t2); letter-spacing:.8px; text-transform:uppercase; border-bottom:1px solid var(--border); background:rgba(255,255,255,.02); }
+    .inv-table td { padding:12px 14px; font-size:13px; border-bottom:1px solid rgba(255,255,255,.04); vertical-align:middle; }
+    .inv-table tr:hover td { background:rgba(255,255,255,.02); }
+    .stock-bar-bg { flex:1; height:6px; background:rgba(255,255,255,.08); border-radius:4px; }
+    .stock-bar    { height:100%; border-radius:4px; transition:width .3s; }
+
+    /* Prescription row */
+    .rx-row { background:var(--bg2); border:1px solid var(--border); border-radius:var(--r); padding:18px; margin-bottom:12px; }
+    .med-check { display:flex; align-items:center; gap:10px; padding:10px 12px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+    .med-check input[type="checkbox"] { width:16px; height:16px; accent-color:var(--lime); cursor:pointer; }
+    .dispense-box { background:rgba(178,255,89,.05); border:1px solid rgba(178,255,89,.2); border-radius:12px; padding:16px; margin-top:14px; }
+
+    /* Upload zone */
+    .upload-zone { border:2px dashed rgba(0,212,255,.25); border-radius:14px; padding:32px; text-align:center; cursor:pointer; transition:all .3s; background:rgba(0,212,255,.02); }
+    .upload-zone:hover { border-color:var(--cyan); background:rgba(0,212,255,.04); }
+    .upload-zone h3 { font-family:'Syne',sans-serif; font-size:17px; margin-bottom:5px; }
+
+    /* AI summary */
+    .ai-summary { background:linear-gradient(135deg,rgba(124,77,255,.08),rgba(0,212,255,.05)); border:1px solid rgba(124,77,255,.2); border-radius:16px; padding:24px; position:relative; overflow:hidden; margin-bottom:20px; }
+    .ai-summary::before { content:'🤖'; position:absolute; top:-10px; right:20px; font-size:80px; opacity:.05; }
+
+    /* Token display */
+    .token-box { font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:600; letter-spacing:3px; color:var(--purple); background:rgba(124,77,255,.1); padding:10px 20px; border-radius:10px; display:inline-block; margin:10px 0; }
+
+    /* WhatsApp */
+    .wa-btn { display:inline-flex; align-items:center; gap:8px; padding:8px 18px; background:rgba(37,211,102,.1); border:1px solid rgba(37,211,102,.3); border-radius:10px; color:#25D366; font-size:13px; font-weight:600; cursor:pointer; transition:all .2s; } .wa-btn:hover { background:rgba(37,211,102,.18); }
+
+    /* Misc */
+    .divider    { height:1px; background:var(--border); margin:18px 0; }
+    .empty-msg  { color:var(--t2); font-size:13px; padding:20px 0; }
+    .toast { position:fixed; bottom:22px; right:22px; background:var(--bg3); border:1px solid; border-radius:12px; padding:12px 18px; display:flex; align-items:center; gap:9px; z-index:999; font-size:13px; box-shadow:0 4px 20px rgba(0,0,0,.4); transition:all .35s; transform:translateX(200px); opacity:0; }
+    .toast.show { transform:translateX(0); opacity:1; }
+    .toast.success { border-color:rgba(0,230,118,.35); color:var(--green); }
+    .toast.error   { border-color:rgba(255,69,96,.35);  color:var(--red); }
+    .toast.info    { border-color:rgba(0,212,255,.35);  color:var(--cyan); }
+
+    /* Responsive */
+    @media(max-width:768px) {
+      .profile-layout { grid-template-columns:1fr; }
+      .form-row       { grid-template-columns:1fr; }
+      .stats-grid     { grid-template-columns:repeat(3,1fr); }
+      .hero-btns      { flex-direction:column; align-items:center; }
+      .nav-btns .nav-btn .lbl { display:none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div id="root"></div>
+
+  <script>
+    /* ════════════════════════════════════════════════════════════════════
+       SERVER LAYER
+       This is the Node.js / Express backend logic translated to run in
+       the browser using localStorage as the database.
+
+       In a production deployment:
+         - Move this block to server.js (Node.js + Express)
+         - Replace store.* with real DB queries (MongoDB / PostgreSQL)
+         - Replace API.* calls in React with fetch('/api/...')
+
+       Every method mirrors an Express route from server.js exactly.
+    ════════════════════════════════════════════════════════════════════ */
+    const API = (() => {
+
+      /* ── Storage engine (localStorage wrapper) ── */
+      const NS   = 'mc_';   // namespace prefix so we don't collide
+      const genId = () => Math.random().toString(36).slice(2, 10);
+
+      const store = {
+        get:    (key)       => { try { return JSON.parse(localStorage.getItem(NS + key)); } catch { return null; } },
+        set:    (key, val)  => localStorage.setItem(NS + key, JSON.stringify(val)),
+        list:   (key)       => { try { return JSON.parse(localStorage.getItem(NS + key)) || []; } catch { return []; } },
+        push:   (key, item) => { const arr = store.list(key); arr.push(item); store.set(key, arr); },
+        delete: (key)       => localStorage.removeItem(NS + key),
+        keys:   (prefix)    => Object.keys(localStorage).filter(k => k.startsWith(NS + prefix)).map(k => k.replace(NS, '')),
+      };
+
+      /* ── Seed demo data once ── */
+      function seed() {
+        if (store.get('seeded')) return;
+
+        store.set('patient_9876543210', { name:'Arjun Sharma', phone:'9876543210', dob:'1990-05-15', gender:'Male', city:'New Delhi', blood:'O+', height:'175', weight:'72', allergies:'Penicillin, Dust', conditions:'Mild Hypertension, Pre-Diabetes', emergency:'Priya Sharma — 9876543211' });
+        store.set('doctor_9988776655',  { name:'Kavita Mehta', phone:'9988776655', degree:'MBBS, MD (Cardiology)', spec:'Cardiologist', exp:'14', hospital:'Apollo Hospital, Delhi', regnum:'DL-MCI-4521', fee:'800' });
+        store.set('lab_8877665544',     { name:'LifeCare Diagnostics', phone:'8877665544', city:'Mumbai', reg:'LAB-MH-001', tests:'Blood CBC, Lipid, X-Ray, MRI, ECG', established:'2010' });
+        store.set('pharmacist_7766554433', { name:'Suresh Patel', phone:'7766554433', shopName:'MediPlus Pharmacy', city:'Delhi', licenseNo:'PH-DL-5678' });
+
+        store.set('records_9876543210', [
+          { id:genId(), date:'2024-11-20', illness:'Hypertensive Episode', symptoms:'Headache, dizziness, BP 160/100', severity:'Moderate', prescription:'Amlodipine 5mg, Losartan 50mg',         notes:'Monitor BP twice daily. Reduce salt.',   followup:'2024-12-04', doctor:'Dr. Kavita Mehta', hospital:'Apollo Hospital', spec:'Cardiologist'       },
+          { id:genId(), date:'2024-09-10', illness:'Viral Fever',          symptoms:'Fever 102°F, body ache, fatigue',  severity:'Mild',     prescription:'Paracetamol 650mg, ORS, Cetirizine 10mg', notes:'Rest 3 days. Plenty of fluids.',         followup:'2024-09-17', doctor:'Dr. Rohan Gupta',  hospital:'Max Hospital',    spec:'General Physician'  },
+        ]);
+
+        store.set('inventory_7766554433', [
+          { id:genId(), name:'Paracetamol 650mg',  category:'Analgesic',        stock:500, unit:'Tablet', price:1.5,  status:'In Stock'     },
+          { id:genId(), name:'Amlodipine 5mg',     category:'Antihypertensive', stock:200, unit:'Tablet', price:8,    status:'In Stock'     },
+          { id:genId(), name:'Metformin 500mg',    category:'Antidiabetic',     stock:0,   unit:'Tablet', price:3,    status:'Out of Stock' },
+          { id:genId(), name:'Cetirizine 10mg',    category:'Antihistamine',    stock:300, unit:'Tablet', price:2,    status:'In Stock'     },
+          { id:genId(), name:'Losartan 50mg',      category:'Antihypertensive', stock:80,  unit:'Tablet', price:12,   status:'Low Stock'    },
+          { id:genId(), name:'Pantoprazole 40mg',  category:'Antacid',          stock:150, unit:'Tablet', price:5,    status:'In Stock'     },
+        ]);
+
+        store.set('seeded', true);
+      }
+      seed();
+
+      /* ════════════════════════════════════════════
+         PUBLIC API — mirrors every Express route
+      ════════════════════════════════════════════ */
+      return {
+
+        /* ── POST /api/otp/send ── */
+        otp: {
+          send(phone) {
+            if (!phone) return { error: 'Phone required' };
+            console.log(`[OTP] Code 123456 sent to ${phone}`);
+            return { success: true };
+          },
+
+          /* ── POST /api/otp/verify ── */
+          verify(phone, otp, role) {
+            if (otp !== '123456')   return { error: 'Invalid OTP. Use 123456 for demo.' };
+            const user = store.get(`${role}_${phone}`);
+            if (!user)              return { error: 'Account not found. Please register.' };
+            return { success: true, user };
+          },
+        },
+
+        /* ── Patient routes ── */
+        patients: {
+          /* POST /api/patients/register */
+          register(data) {
+            if (!data.phone || !data.name) return { error: 'Phone and name required' };
+            if (store.get(`patient_${data.phone}`)) return { error: 'Account already exists' };
+            store.set(`patient_${data.phone}`, data);
+            return { success: true, user: data };
+          },
+
+          /* GET /api/patients/:phone */
+          get(phone) {
+            const pt = store.get(`patient_${phone}`);
+            return pt || { error: 'Patient not found' };
+          },
+
+          /* GET /api/patients/:phone/records */
+          getRecords(phone) {
+            return store.list(`records_${phone}`);
+          },
+
+          /* POST /api/patients/:phone/records */
+          addRecord(phone, record) {
+            const full = { id: genId(), ...record };
+            store.push(`records_${phone}`, full);
+            return { success: true, record: full };
+          },
+
+          /* GET /api/patients/:phone/vitals */
+          getVitals(phone) {
+            return store.get(`vitals_${phone}`) || { bp: [], sugar: [], weight: [] };
+          },
+
+          /* POST /api/patients/:phone/vitals */
+          addVital(phone, type, entry) {
+            const vitals = store.get(`vitals_${phone}`) || { bp: [], sugar: [], weight: [] };
+            vitals[type].push(entry);
+            store.set(`vitals_${phone}`, vitals);
+            return { success: true };
+          },
+
+          /* GET /api/patients/:phone/appointments */
+          getAppointments(phone) {
+            return store.list(`appts_${phone}`);
+          },
+
+          /* POST /api/patients/:phone/appointments */
+          addAppointment(phone, appt) {
+            const full = { id: genId(), status: 'Confirmed', ...appt };
+            store.push(`appts_${phone}`, full);
+            return { success: true, appt: full };
+          },
+
+          /* GET /api/patients/:phone/lab-reports */
+          getLabReports(phone) {
+            return store.list(`labreports_${phone}`);
+          },
+        },
+
+        /* ── Doctor routes ── */
+        doctors: {
+          /* POST /api/doctors/register */
+          register(data) {
+            if (!data.phone || !data.name) return { error: 'Phone and name required' };
+            store.set(`doctor_${data.phone}`, data);
+            return { success: true, user: data };
+          },
+
+          /* GET /api/doctors/:phone */
+          get(phone) {
+            return store.get(`doctor_${phone}`) || { error: 'Doctor not found' };
+          },
+
+          /* GET /api/search/patient?q=phone */
+          searchPatient(q) {
+            const pt = store.get(`patient_${q}`);
+            if (!pt) return { error: 'Patient not found' };
+            return {
+              patient:    pt,
+              records:    store.list(`records_${q}`),
+              labReports: store.list(`labreports_${q}`),
+            };
+          },
+
+          /* Collect all appointments booked with this doctor */
+          getAppointments(doctorName) {
+            const result = [];
+            store.keys('appts_').forEach(key => {
+              const phone = key.replace('appts_', '');
+              store.list(key).forEach(a => {
+                if (a.doctor?.toLowerCase().includes(doctorName.toLowerCase())) {
+                  const pt = store.get(`patient_${phone}`);
+                  result.push({ ...a, ptName: pt?.name || phone, ptPhone: phone });
+                }
+              });
+            });
+            return result;
+          },
+        },
+
+        /* ── Lab routes ── */
+        labs: {
+          /* POST /api/labs/register */
+          register(data) {
+            store.set(`lab_${data.phone}`, data);
+            return { success: true, user: data };
+          },
+
+          /* POST /api/labs/:phone/upload */
+          uploadReport(labPhone, patientPhone, report) {
+            const full = { id: genId(), labPhone, ...report };
+            store.push(`labreports_${patientPhone}`, full);
+            /* Save to lab's own history */
+            const pt = store.get(`patient_${patientPhone}`);
+            store.push(`labhistory_${labPhone}`, { ...full, patientName: pt?.name || patientPhone });
+            return { success: true, report: full };
+          },
+
+          getHistory(labPhone) {
+            return store.list(`labhistory_${labPhone}`);
+          },
+        },
+
+        /* ── Pharmacist routes ── */
+        pharmacists: {
+          /* POST /api/pharmacists/register */
+          register(data) {
+            if (!data.phone || !data.name) return { error: 'Phone and name required' };
+            store.set(`pharmacist_${data.phone}`, data);
+            return { success: true, user: data };
+          },
+
+          /* GET /api/pharmacists/:phone */
+          get(phone) {
+            return store.get(`pharmacist_${phone}`) || { error: 'Pharmacist not found' };
+          },
+
+          /* GET /api/pharmacists/:phone/inventory */
+          getInventory(phone) {
+            return store.list(`inventory_${phone}`);
+          },
+
+          /* POST /api/pharmacists/:phone/inventory */
+          addMedicine(phone, med) {
+            const full = { id: genId(), status: 'In Stock', ...med };
+            store.push(`inventory_${phone}`, full);
+            return { success: true, medicine: full };
+          },
+
+          /* PUT /api/pharmacists/:phone/inventory/:id */
+          updateMedicine(phone, id, updates) {
+            const list = store.list(`inventory_${phone}`);
+            const idx  = list.findIndex(m => m.id === id);
+            if (idx === -1) return { error: 'Medicine not found' };
+            list[idx] = { ...list[idx], ...updates };
+            store.set(`inventory_${phone}`, list);
+            return { success: true, medicine: list[idx] };
+          },
+
+          /* DELETE /api/pharmacists/:phone/inventory/:id */
+          deleteMedicine(phone, id) {
+            const list = store.list(`inventory_${phone}`).filter(m => m.id !== id);
+            store.set(`inventory_${phone}`, list);
+            return { success: true };
+          },
+
+          /* GET /api/pharmacists/patient/:patientPhone/prescriptions */
+          getPatientPrescriptions(patientPhone) {
+            const patient = store.get(`patient_${patientPhone}`);
+            if (!patient) return { error: 'Patient not found' };
+            const records = store.list(`records_${patientPhone}`);
+            const prescriptions = records
+              .filter(r => r.prescription)
+              .map(r => ({
+                visitId:      r.id,
+                date:         r.date,
+                doctor:       r.doctor,
+                illness:      r.illness,
+                prescription: r.prescription,
+                medicines:    r.prescription.split(',').map(m => m.trim()).filter(Boolean),
+              }));
+            return { patient, prescriptions };
+          },
+
+          /* POST /api/pharmacists/:pharmPhone/dispense */
+          dispense(pharmPhone, { patientPhone, medicines }) {
+            const pharma   = store.get(`pharmacist_${pharmPhone}`);
+            const patient  = store.get(`patient_${patientPhone}`);
+            const log = {
+              id:           genId(),
+              patientPhone,
+              patientName:  patient?.name || 'Unknown',
+              medicines,
+              dispensedAt:  new Date().toISOString(),
+              pharmacist:   pharma?.name     || 'Unknown',
+              shopName:     pharma?.shopName || '',
+            };
+            store.push(`dispenselog_${pharmPhone}`, log);
+            return { success: true, log };
+          },
+
+          /* GET /api/pharmacists/:phone/dispense-history */
+          getDispenseHistory(phone) {
+            return store.list(`dispenselog_${phone}`);
+          },
+        },
+
+        /* ── Token routes ── */
+        tokens: {
+          /* POST /api/tokens/generate */
+          generate(phone) {
+            const token  = Math.random().toString(36).substring(2, 10).toUpperCase();
+            const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+            store.set(`token_${token}`, { phone, expiry });
+            return { success: true, token, expiry };
+          },
+
+          /* GET /api/tokens/:token */
+          verify(token) {
+            const data = store.get(`token_${token}`);
+            if (!data)                          return { error: 'Invalid token' };
+            if (new Date() > new Date(data.expiry)) return { error: 'Token expired' };
+            const pt = store.get(`patient_${data.phone}`);
+            if (!pt)                            return { error: 'Patient not found' };
+            return { patient: pt, records: store.list(`records_${data.phone}`) };
+          },
+
+          /* DELETE /api/tokens/:token */
+          revoke(token) {
+            store.delete(`token_${token}`);
+            return { success: true };
+          },
+        },
+
+        /* Helper: share via WhatsApp */
+        shareWhatsApp(msg) {
+          window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+        },
+      };
+    })();
+    /* ════ END SERVER LAYER ════ */
+  </script>
+
+  <script type="text/babel">
+    /* ════════════════════════════════════════════════════════════════════
+       REACT FRONTEND
+       All data operations go through API.* (defined in the SERVER LAYER
+       above). To switch to a real backend, replace each API.* call with
+       the equivalent fetch('/api/...') call.
+    ════════════════════════════════════════════════════════════════════ */
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    /* ── Drug interaction checker ── */
+    const DRUG_PAIRS = {
+      warfarin:     ['aspirin','ibuprofen','naproxen'],
+      metformin:    ['alcohol','contrast'],
+      amlodipine:   ['simvastatin','grapefruit'],
+      aspirin:      ['warfarin','ibuprofen'],
+      losartan:     ['potassium','nsaids'],
+      atorvastatin: ['clarithromycin','erythromycin'],
+    };
+    function checkInteraction(newMed, existingMeds) {
+      if (!newMed || !existingMeds) return null;
+      const nm = newMed.toLowerCase(), em = existingMeds.toLowerCase();
+      for (const [drug, conflicts] of Object.entries(DRUG_PAIRS)) {
+        for (const c of conflicts) {
+          if ((nm.includes(drug) && em.includes(c)) || (em.includes(drug) && nm.includes(c)))
+            return `⚠️ Possible interaction: ${drug} + ${c}`;
+        }
+      }
+      return null;
+    }
+
+    /* ── Utility helpers ── */
+    const fmtDt  = dt => { try { return new Date(dt).toLocaleString('en-IN',{ dateStyle:'medium', timeStyle:'short' }); } catch { return dt; } };
+    const nowTime= ()  => new Date().toLocaleTimeString('en-IN',{ hour:'2-digit', minute:'2-digit' });
+
+    /* ── Gemini API call ── */
+    async function callGemini(prompt) {
+      const key = localStorage.getItem('mc_geminiKey');
+      if (!key) return '⚙️ Add your Gemini API key using the button above to enable AI features. Get one free at Google AI Studio.';
+      try {
+        const res  = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+        });
+        const data = await res.json();
+        if (data.error) return `❌ API Error: ${data.error.message}`;
+        return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response received.';
+      } catch {
+        return '❌ Connection error. Check your API key.';
+      }
+    }
+
+    /* ══════════════════════════════════════════
+       SHARED COMPONENTS
+    ══════════════════════════════════════════ */
+
+    /* Toast notification */
+    function Toast({ message, type, show }) {
+      return message
+        ? <div className={`toast ${type} ${show ? 'show' : ''}`}>
+            <span>{type==='success'?'✅':type==='error'?'❌':'ℹ️'}</span>
+            <span>{message}</span>
+          </div>
+        : null;
+    }
+
+    /* 6-digit OTP input */
+    function OtpInput({ onComplete }) {
+      const [digits, setDigits] = useState(Array(6).fill(''));
+      const refs = Array.from({ length: 6 }, () => useRef(null));
+      const onChange = (i, val) => {
+        if (!/^\d?$/.test(val)) return;
+        const next = [...digits]; next[i] = val; setDigits(next);
+        if (val && i < 5) refs[i+1].current.focus();
+        if (next.every(d => d)) onComplete(next.join(''));
+      };
+      const onKey = (i, e) => { if (e.key==='Backspace' && !digits[i] && i>0) refs[i-1].current.focus(); };
+      return (
+        <div className="otp-wrap">
+          {digits.map((d,i) => (
+            <input key={i} ref={refs[i]} className="otp-box" maxLength={1}
+              value={d} onChange={e=>onChange(i,e.target.value)} onKeyDown={e=>onKey(i,e)} />
+          ))}
+        </div>
+      );
+    }
+
+    /* Single visit record card */
+    function RecordCard({ record }) {
+      return (
+        <div className="record-card">
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:8 }}>
+            <div className="record-title">🏥 {record.illness}</div>
+            <div className="record-date">{record.date}</div>
+          </div>
+          <div className="tags-row">
+            <span className="tag tag-red">🦠 {record.illness}</span>
+            <span className="tag tag-amber">⚠️ {record.severity}</span>
+            <span className="tag tag-cyan">👨‍⚕️ {record.doctor}</span>
+            {record.hospital && <span className="tag tag-purple">🏥 {record.hospital}</span>}
+          </div>
+          <div className="record-body">
+            <strong>Symptoms:</strong> {record.symptoms}<br/>
+            <strong>Doctor:</strong> {record.doctor}{record.spec?` · ${record.spec}`:''}<br/>
+            {record.notes    && <><strong>Notes:</strong> {record.notes}<br/></>}
+            {record.followup && <><strong>Follow-up:</strong> {record.followup}</>}
+          </div>
+          {record.prescription && <div className="record-rx">💊 <strong>Prescription:</strong> {record.prescription}</div>}
+        </div>
+      );
+    }
+
+    /* Key-value fields grid */
+    function FieldGrid({ fields }) {
+      return (
+        <div className="fields-grid">
+          {fields.map(([k,v]) => (
+            <div className="field-item" key={k}>
+              <div className="field-key">{k}</div>
+              <div className="field-value">{v || '—'}</div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    /* Empty state */
+    const Empty = ({ text }) => <div className="empty-msg">{text}</div>;
+
+    /* ══════════════════════════════════════════
+       AUTH MODAL
+    ══════════════════════════════════════════ */
+    function AuthModal({ role, onClose, onLogin, showToast }) {
+      const [tab,   setTab]   = useState('login');
+      const [phone, setPhone] = useState('');
+      const [otpSent, setOtpSent] = useState(false);
+      const [form, setForm]   = useState({});
+
+      const COLOR = { patient:'var(--cyan)', doctor:'var(--teal)', lab:'var(--amber)', pharmacist:'var(--lime)' };
+      const BTN   = { patient:'btn-cyan',    doctor:'btn-teal',    lab:'btn-amber',    pharmacist:'btn-lime'    };
+      const TITLE = { patient:'👤 Patient Portal', doctor:'👨‍⚕️ Doctor Portal', lab:'🔬 Laboratory Portal', pharmacist:'💊 Pharmacist Portal' };
+
+      const sendOtp = () => {
+        if (phone.length < 10) { showToast('Enter a valid 10-digit number', 'error'); return; }
+        API.otp.send(phone);
+        setOtpSent(true);
+        showToast(`OTP sent to ${phone} — use 123456 for demo`, 'info');
+      };
+
+      const verifyOtp = (otp) => {
+        const res = API.otp.verify(phone, otp, role);
+        if (res.error) { showToast(res.error, 'error'); return; }
+        onLogin(role, phone, res.user);
+      };
+
+      const register = () => {
+        if (!form.phone || !form.name) { showToast('Fill all required fields', 'error'); return; }
+        let res;
+        if      (role==='patient')    res = API.patients.register(form);
+        else if (role==='doctor')     res = API.doctors.register(form);
+        else if (role==='lab')        res = API.labs.register(form);
+        else                          res = API.pharmacists.register(form);
+        if (res.error) { showToast(res.error, 'error'); return; }
+        onLogin(role, form.phone, res.user);
+      };
+
+      const sf = k => e => setForm(p => ({ ...p, [k]: e.target.value }));
+
+      return (
+        <div className="modal-overlay" onClick={e => e.target===e.currentTarget && onClose()}>
+          <div className="modal-box">
+            <button className="modal-close" onClick={onClose}>✕</button>
+            <div className="modal-title" style={{ color: COLOR[role] }}>{TITLE[role]}</div>
+            <div className="modal-subtitle">Login or register to access your dashboard</div>
+            <div className="tab-sw">
+              <button className={`tab-sw-btn ${tab==='login'?'active':''}`}    onClick={()=>setTab('login')}>Login</button>
+              <button className={`tab-sw-btn ${tab==='register'?'active':''}`} onClick={()=>setTab('register')}>Register</button>
+            </div>
+
+            {/* LOGIN */}
+            {tab==='login' && (
+              <div>
+                <div className="form-group">
+                  <label className="form-label">Phone Number</label>
+                  <input className="form-input" type="tel" placeholder="10-digit mobile" value={phone} onChange={e=>setPhone(e.target.value)} />
+                </div>
+                {!otpSent
+                  ? <button className={`btn btn-full ${BTN[role]}`} onClick={sendOtp}>📱 Send OTP</button>
+                  : <>
+                      <div className="otp-hint">OTP sent to <span>{phone}</span> · Use <span>123456</span> for demo</div>
+                      <OtpInput onComplete={verifyOtp} />
+                    </>
+                }
+              </div>
+            )}
+
+            {/* REGISTER FORMS */}
+            {tab==='register' && role==='patient' && (
+              <div>
+                <div className="form-row"><div className="form-group"><label className="form-label">Full Name</label><input className="form-input" placeholder="Your name" onChange={sf('name')}/></div><div className="form-group"><label className="form-label">Phone</label><input className="form-input" type="tel" placeholder="10 digits" onChange={sf('phone')}/></div></div>
+                <div className="form-row"><div className="form-group"><label className="form-label">Date of Birth</label><input className="form-input" type="date" onChange={sf('dob')}/></div><div className="form-group"><label className="form-label">Gender</label><select className="form-input" onChange={sf('gender')}><option>Male</option><option>Female</option><option>Other</option></select></div></div>
+                <div className="form-row"><div className="form-group"><label className="form-label">City</label><input className="form-input" placeholder="Delhi..." onChange={sf('city')}/></div><div className="form-group"><label className="form-label">Blood Group</label><select className="form-input" onChange={sf('blood')}><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div></div>
+                <div className="form-row"><div className="form-group"><label className="form-label">Height (cm)</label><input className="form-input" type="number" placeholder="170" onChange={sf('height')}/></div><div className="form-group"><label className="form-label">Weight (kg)</label><input className="form-input" type="number" placeholder="65" onChange={sf('weight')}/></div></div>
+                <div className="form-group"><label className="form-label">Allergies</label><input className="form-input" placeholder="Penicillin, None..." onChange={sf('allergies')}/></div>
+                <div className="form-group"><label className="form-label">Existing Conditions</label><input className="form-input" placeholder="Diabetes, None..." onChange={sf('conditions')}/></div>
+                <div className="form-group"><label className="form-label">Emergency Contact</label><input className="form-input" placeholder="Name — Phone" onChange={sf('emergency')}/></div>
+                <button className={`btn btn-full ${BTN[role]}`} style={{marginTop:6}} onClick={register}>Register &amp; Verify</button>
+              </div>
+            )}
+            {tab==='register' && role==='doctor' && (
+              <div>
+                <div className="form-row"><div className="form-group"><label className="form-label">Full Name</label><input className="form-input" placeholder="Dr. Name" onChange={sf('name')}/></div><div className="form-group"><label className="form-label">Phone</label><input className="form-input" type="tel" placeholder="10 digits" onChange={sf('phone')}/></div></div>
+                <div className="form-row"><div className="form-group"><label className="form-label">Degree</label><input className="form-input" placeholder="MBBS, MD..." onChange={sf('degree')}/></div><div className="form-group"><label className="form-label">Specialization</label><input className="form-input" placeholder="Cardiologist..." onChange={sf('spec')}/></div></div>
+                <div className="form-row"><div className="form-group"><label className="form-label">Experience (yrs)</label><input className="form-input" type="number" placeholder="10" onChange={sf('exp')}/></div><div className="form-group"><label className="form-label">Fee (₹)</label><input className="form-input" type="number" placeholder="500" onChange={sf('fee')}/></div></div>
+                <div className="form-group"><label className="form-label">Hospital / Clinic</label><input className="form-input" placeholder="Hospital & city" onChange={sf('hospital')}/></div>
+                <div className="form-group"><label className="form-label">Medical Reg. Number</label><input className="form-input" placeholder="MCI reg. number" onChange={sf('regnum')}/></div>
+                <button className={`btn btn-full ${BTN[role]}`} style={{marginTop:6}} onClick={register}>Register as Doctor</button>
+              </div>
+            )}
+            {tab==='register' && role==='lab' && (
+              <div>
+                <div className="form-row"><div className="form-group"><label className="form-label">Lab Name</label><input className="form-input" placeholder="Lab name" onChange={sf('name')}/></div><div className="form-group"><label className="form-label">Phone</label><input className="form-input" type="tel" placeholder="10 digits" onChange={sf('phone')}/></div></div>
+                <div className="form-row"><div className="form-group"><label className="form-label">City</label><input className="form-input" placeholder="City" onChange={sf('city')}/></div><div className="form-group"><label className="form-label">Govt. Reg. No.</label><input className="form-input" placeholder="Cert. number" onChange={sf('reg')}/></div></div>
+                <div className="form-group"><label className="form-label">Tests Offered</label><input className="form-input" placeholder="Blood, X-Ray, MRI..." onChange={sf('tests')}/></div>
+                <button className={`btn btn-full ${BTN[role]}`} style={{marginTop:6}} onClick={register}>Register Laboratory</button>
+              </div>
+            )}
+            {tab==='register' && role==='pharmacist' && (
+              <div>
+                <div className="form-row"><div className="form-group"><label className="form-label">Full Name</label><input className="form-input" placeholder="Your name" onChange={sf('name')}/></div><div className="form-group"><label className="form-label">Phone</label><input className="form-input" type="tel" placeholder="10 digits" onChange={sf('phone')}/></div></div>
+                <div className="form-row"><div className="form-group"><label className="form-label">Pharmacy Name</label><input className="form-input" placeholder="Shop name" onChange={sf('shopName')}/></div><div className="form-group"><label className="form-label">City</label><input className="form-input" placeholder="City" onChange={sf('city')}/></div></div>
+                <div className="form-group"><label className="form-label">Drug License No.</label><input className="form-input" placeholder="PH-DL-XXXX" onChange={sf('licenseNo')}/></div>
+                <button className={`btn btn-full ${BTN[role]}`} style={{marginTop:6}} onClick={register}>Register as Pharmacist</button>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    /* ══════════════════════════════════════════
+       EMERGENCY OVERLAY
+    ══════════════════════════════════════════ */
+    function EmergencyOverlay({ patient, onClose }) {
+      const records = API.patients.getRecords(patient.phone);
+      const lastRx  = records.length ? records[records.length-1].prescription : 'No records';
+      const emCards = [
+        { border:'rgba(255,69,96,.4)',   icon:'🩸', label:'Blood Group',      val:patient.blood||'—',            color:'var(--red)'   },
+        { border:'rgba(255,171,0,.4)',   icon:'⚠️', label:'Allergies',        val:patient.allergies||'None known',color:'var(--amber)' },
+        { border:'rgba(0,212,255,.4)',   icon:'💊', label:'Current Medicines', val:lastRx,                        color:'var(--cyan)'  },
+        { border:'rgba(0,230,118,.4)',   icon:'📞', label:'Emergency Contact', val:patient.emergency||'Not set', color:'var(--green)' },
+      ];
+      return (
+        <div className="em-overlay">
+          <div style={{ textAlign:'center', marginBottom:32 }}>
+            <div className="em-pulse">🆘</div>
+            <div style={{ fontFamily:'Syne', fontSize:28, fontWeight:800, color:'var(--red)' }}>EMERGENCY ACCESS</div>
+            <div style={{ color:'var(--t2)', fontSize:13 }}>Critical patient info — {patient.name}</div>
+          </div>
+          <div className="em-grid">
+            {emCards.map(c => (
+              <div className="em-card" key={c.label} style={{ borderColor:c.border }}>
+                <div style={{ fontSize:32, marginBottom:8 }}>{c.icon}</div>
+                <div style={{ fontSize:10, color:'var(--t2)', textTransform:'uppercase', letterSpacing:1, marginBottom:4 }}>{c.label}</div>
+                <div className="em-val" style={{ color:c.color, fontSize:c.label==='Current Medicines'?13:undefined }}>{c.val}</div>
+              </div>
+            ))}
+          </div>
+          <button className="btn btn-ghost" onClick={onClose}>Close Emergency View</button>
+        </div>
+      );
+    }
+
+    /* ══════════════════════════════════════════
+       PATIENT DASHBOARD
+    ══════════════════════════════════════════ */
+    function PatientDashboard({ user, showToast }) {
+      const [tab, setTab] = useState('overview');
+      const tabs = [
+        'overview','history','labReports','appointments','doctors',
+        'scan','trends','share','medibot','profile',
+      ];
+      const LABEL = {
+        overview:'📊 Overview', history:'🏥 History', labReports:'🔬 Lab Reports',
+        appointments:'📅 Appointments', doctors:'👨‍⚕️ My Doctors',
+        scan:'📸 Rx Scanner', trends:'📈 Trends', share:'🔐 Access Sharing',
+        medibot:'🤖 MediBot', profile:'👤 Profile',
+      };
+      return (
+        <div className="container">
+          <div className="dash-hdr">
+            <div><div className="dash-welcome">Welcome, <span>{user.name}</span></div><div className="dash-meta">📱 {user.phone}</div></div>
+            <div style={{ display:'flex', gap:10, alignItems:'center', flexWrap:'wrap' }}>
+              <span className="role-badge rb-pt">Patient</span>
+              <span className="vbadge">✓ OTP Verified</span>
+            </div>
+          </div>
+          <div className="dash-tabs">{tabs.map(t=><button key={t} className={`dash-tab ${tab===t?'active':''}`} onClick={()=>setTab(t)}>{LABEL[t]}</button>)}</div>
+          {tab==='overview'      && <PtOverview     user={user} showToast={showToast} />}
+          {tab==='history'       && <PtHistory      user={user} />}
+          {tab==='labReports'    && <PtLabReports   user={user} />}
+          {tab==='appointments'  && <PtAppointments user={user} showToast={showToast} />}
+          {tab==='doctors'       && <PtDoctors      user={user} />}
+          {tab==='scan'          && <PtRxScanner    user={user} showToast={showToast} />}
+          {tab==='trends'        && <PtTrends       user={user} showToast={showToast} />}
+          {tab==='share'         && <PtShare        user={user} showToast={showToast} />}
+          {tab==='medibot'       && <MediBot        user={user} showToast={showToast} />}
+          {tab==='profile'       && <PtProfile      user={user} />}
+        </div>
+      );
+    }
+
+    /* Patient — Overview */
+    function PtOverview({ user, showToast }) {
+      const [summary, setSummary] = useState('Click "Generate" for your AI health summary.');
+      const [loading, setLoading] = useState(false);
+      const records    = API.patients.getRecords(user.phone);
+      const labReports = API.patients.getLabReports(user.phone);
+      const appts      = API.patients.getAppointments(user.phone);
+      const uniqueDocs = [...new Set(records.map(r=>r.doctor))].length;
+
+      const generate = async () => {
+        setLoading(true);
+        const ctx = `${user.name}, ${user.gender}, Blood: ${user.blood}, Conditions: ${user.conditions}, ${records.length} visits, latest: ${records.slice(-1)[0]?.illness||'none'}`;
+        const res = await callGemini(`Write a warm, concise 3-sentence health summary for: ${ctx}`);
+        setSummary(res); setLoading(false);
+      };
+
+      return (
+        <div>
+          <div className="metrics-grid">
+            {[['🏥','var(--red)',records.length,'Visits'],['👨‍⚕️','var(--cyan)',uniqueDocs,'Doctors'],['🔬','var(--amber)',labReports.length,'Lab Reports'],['📅','var(--green)',appts.length,'Appointments']].map(([icon,color,val,lbl])=>(
+              <div className="metric-card" key={lbl}><div className="metric-icon" style={{background:`${color}22`}}>{icon}</div><div><div className="metric-val" style={{color}}>{val}</div><div className="metric-lbl">{lbl}</div></div></div>
+            ))}
+          </div>
+          <div className="ai-summary">
+            <div style={{ fontFamily:'Syne', fontSize:18, fontWeight:700, color:'var(--purple)', marginBottom:4 }}>🤖 AI Health Summary</div>
+            <div style={{ fontSize:14, color:'var(--t2)', lineHeight:1.7 }}>{loading?'⏳ Generating...':summary}</div>
+            <button className="btn btn-sm btn-purple" style={{marginTop:14}} onClick={generate}>✨ Generate</button>
+          </div>
+          <div className="sec-hdr"><h2>📌 Recent Visits</h2></div>
+          {records.length ? [...records].reverse().slice(0,3).map(r=><RecordCard key={r.id} record={r}/>) : <Empty text="No visits yet."/>}
+        </div>
+      );
+    }
+
+    /* Patient — History */
+    function PtHistory({ user }) {
+      const records = API.patients.getRecords(user.phone);
+      return (
+        <div>
+          <div className="sec-hdr">
+            <h2>🏥 Full Medical History</h2>
+            <button className="wa-btn" onClick={()=>API.shareWhatsApp(`📋 ${user.name}'s Medical Summary — ${records.length} visits on MediCard`)}>📲 Share</button>
+          </div>
+          {records.length ? [...records].reverse().map(r=><RecordCard key={r.id} record={r}/>) : <Empty text="No medical history yet."/>}
+        </div>
+      );
+    }
+
+    /* Patient — Lab Reports */
+    function PtLabReports({ user }) {
+      const reports = API.patients.getLabReports(user.phone);
+      return (
+        <div>
+          <div className="sec-hdr"><h2>🔬 Lab Reports</h2></div>
+          {reports.length
+            ? <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))', gap:12 }}>
+                {reports.map((r,i) => (
+                  <div key={i} style={{background:'var(--bg2)',border:'1px solid var(--border)',borderRadius:12,overflow:'hidden'}}>
+                    <div style={{padding:18,background:'rgba(255,171,0,.05)',textAlign:'center',fontSize:32}}>📋</div>
+                    <div style={{padding:12}}>
+                      <div style={{fontWeight:600,fontSize:13}}>{r.type}</div>
+                      <div style={{fontSize:11,color:'var(--t2)',fontFamily:'JetBrains Mono'}}>{r.date}</div>
+                      <div style={{fontSize:11,color:'var(--amber)',marginTop:3}}>{r.lab}</div>
+                      {r.summary && <div style={{fontSize:11,color:'var(--t2)',marginTop:4}}>{r.summary}</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            : <Empty text="No lab reports yet. Certified labs upload reports directly to your profile."/>
+          }
+        </div>
+      );
+    }
+
+    /* Patient — Appointments */
+    function PtAppointments({ user, showToast }) {
+      const [appts, setAppts] = useState(API.patients.getAppointments(user.phone));
+      const [show,  setShow]  = useState(false);
+      const [form,  setForm]  = useState({ doctor:'', spec:'', hospital:'', datetime:'', reason:'' });
+      const sf = k => e => setForm(p=>({...p,[k]:e.target.value}));
+
+      const book = () => {
+        if (!form.doctor || !form.datetime) { showToast('Fill doctor name and date/time', 'error'); return; }
+        API.patients.addAppointment(user.phone, form);
+        setAppts(API.patients.getAppointments(user.phone));
+        setShow(false);
+        showToast('Appointment booked!', 'success');
+      };
+
+      return (
+        <div>
+          <div className="sec-hdr"><h2>📅 Appointments</h2><button className="btn ob-cyan btn-sm" onClick={()=>setShow(s=>!s)}>+ Book</button></div>
+          {show && (
+            <div className="panel" style={{marginBottom:16}}>
+              <div className="form-row"><div className="form-group"><label className="form-label">Doctor Name</label><input className="form-input" placeholder="Dr. Name" onChange={sf('doctor')}/></div><div className="form-group"><label className="form-label">Specialization</label><input className="form-input" placeholder="Cardiologist..." onChange={sf('spec')}/></div></div>
+              <div className="form-row"><div className="form-group"><label className="form-label">Hospital</label><input className="form-input" placeholder="Hospital name" onChange={sf('hospital')}/></div><div className="form-group"><label className="form-label">Date &amp; Time</label><input className="form-input" type="datetime-local" onChange={sf('datetime')}/></div></div>
+              <div className="form-group"><label className="form-label">Reason</label><input className="form-input" placeholder="Follow-up, symptoms..." onChange={sf('reason')}/></div>
+              <div style={{display:'flex',gap:10}}><button className="btn btn-cyan" onClick={book}>Confirm Booking</button><button className="btn btn-ghost btn-sm" onClick={()=>setShow(false)}>Cancel</button></div>
+            </div>
+          )}
+          {appts.length
+            ? <div className="appt-grid">{appts.map((a,i)=>(
+                <div className="appt-card" key={i}>
+                  <div className="appt-time">📅 {fmtDt(a.datetime)}</div>
+                  <div className="appt-doc">{a.doctor}</div>
+                  <div style={{fontSize:12,color:'var(--teal)',marginBottom:5}}>{a.spec}</div>
+                  <div style={{fontSize:12,color:'var(--t2)'}}>🏥 {a.hospital}</div>
+                  <div style={{fontSize:12,color:'var(--t2)',marginTop:3}}>📝 {a.reason}</div>
+                  <div style={{marginTop:10}}><span className={`appt-status ${a.status==='Confirmed'?'s-conf':'s-pend'}`}>{a.status}</span></div>
+                </div>
+              ))}</div>
+            : <Empty text="No appointments booked yet."/>
+          }
+        </div>
+      );
+    }
+
+    /* Patient — My Doctors */
+    function PtDoctors({ user }) {
+      const records = API.patients.getRecords(user.phone);
+      const doctors = [...new Map(records.map(r=>[r.doctor,r])).values()];
+      return (
+        <div>
+          <div className="sec-hdr"><h2>👨‍⚕️ My Doctors</h2></div>
+          {doctors.length
+            ? <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))',gap:14}}>
+                {doctors.map((d,i)=>(
+                  <div className="card" key={i}>
+                    <div style={{width:44,height:44,borderRadius:12,background:'linear-gradient(135deg,rgba(0,180,160,.25),rgba(0,212,255,.25))',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,marginBottom:10}}>👨‍⚕️</div>
+                    <div style={{fontFamily:'Syne',fontSize:16,fontWeight:700}}>{d.doctor}</div>
+                    <div style={{fontSize:12,color:'var(--teal)',marginBottom:6}}>{d.spec}</div>
+                    <div style={{fontSize:12,color:'var(--t2)'}}>🏥 {d.hospital||''}</div>
+                    <div style={{marginTop:8}}><span className="tag tag-cyan">{d.date}</span></div>
+                  </div>
+                ))}
+              </div>
+            : <Empty text="No doctors yet."/>
+          }
+        </div>
+      );
+    }
+
+    /* Patient — Prescription Scanner */
+    function PtRxScanner({ user, showToast }) {
+      const [result, setResult] = useState(null);
+      const scan = () => {
+        showToast('🔍 AI scanning...', 'info');
+        setTimeout(() => {
+          const meds  = ['Amoxicillin 500mg','Paracetamol 650mg','Amlodipine 5mg','Cetirizine 10mg','Metformin 500mg'];
+          const doses = ['Twice daily','Once at night','Three times daily','Once morning'];
+          setResult({
+            med1:     meds[Math.floor(Math.random()*meds.length)],
+            med2:     meds[Math.floor(Math.random()*meds.length)],
+            dosage:   doses[Math.floor(Math.random()*doses.length)],
+            duration: '5 days',
+            date:     new Date().toISOString().slice(0,10),
+          });
+          showToast('✅ Prescription scanned!', 'success');
+        }, 1800);
+      };
+
+      const save = () => {
+        if (!result) return;
+        API.patients.addRecord(user.phone, { date:result.date, illness:'Scanned Prescription', symptoms:'From uploaded prescription', severity:'Mild', prescription:`${result.med1}, ${result.med2}`, notes:'Digitized via AI Scanner', followup:'', doctor:'AI Scanner', hospital:'—', spec:'—' });
+        showToast('Saved to records!', 'success');
+      };
+
+      return (
+        <div>
+          <div className="sec-hdr"><h2>📸 AI Prescription Scanner</h2></div>
+          <div className="info-banner">Upload any handwritten or printed prescription photo. AI extracts medicine, dosage, and date automatically.</div>
+          <div className="upload-zone" onClick={scan}>
+            <div style={{fontSize:48,marginBottom:10}}>📷</div>
+            <h3>Upload or Tap to Scan</h3>
+            <p>JPG, PNG — handwritten or printed</p>
+          </div>
+          {result && (
+            <div style={{background:'var(--bg3)',border:'1px solid rgba(0,230,118,.3)',borderRadius:14,padding:20,marginTop:14}}>
+              <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
+                <div style={{width:36,height:36,borderRadius:10,background:'rgba(0,230,118,.15)',display:'flex',alignItems:'center',justifyContent:'center'}}>✅</div>
+                <div><div style={{fontFamily:'Syne',fontSize:16,fontWeight:700,color:'var(--green)'}}>Extracted Successfully</div><div style={{fontSize:12,color:'var(--t2)'}}>Review and save</div></div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:10,marginBottom:14}}>
+                {[['Medicine 1',result.med1],['Medicine 2',result.med2],['Dosage',result.dosage],['Duration',result.duration],['Date',result.date]].map(([k,v])=>(
+                  <div key={k} style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.08)',borderRadius:10,padding:12}}>
+                    <div style={{fontSize:10,color:'var(--t3)',letterSpacing:1,textTransform:'uppercase',marginBottom:4}}>{k}</div>
+                    <div style={{fontSize:14,fontWeight:600,color:'var(--green)'}}>{v}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{display:'flex',gap:10}}>
+                <button className="btn ob-cyan btn-sm" onClick={save}>✅ Save to Records</button>
+                <button className="wa-btn" onClick={()=>API.shareWhatsApp(`💊 Prescription: ${result.med1}, ${result.med2} — ${result.dosage}`)}>📲 WhatsApp</button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    /* Patient — Health Trends */
+    function PtTrends({ user, showToast }) {
+      const bpRef=useRef(), sugarRef=useRef(), weightRef=useRef();
+      const charts=useRef({});
+      const [bpForm,     setBp]     = useState({ sys:'', dia:'' });
+      const [sugarForm,  setSugar]  = useState('');
+      const [weightForm, setWeight] = useState('');
+
+      const buildAll = useCallback(() => {
+        const v = API.patients.getVitals(user.phone);
+        const opts = { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:'#7fa8c9', font:{ family:'DM Sans' } } } }, scales:{ x:{ ticks:{color:'#3d6080'}, grid:{color:'rgba(255,255,255,.04)'} }, y:{ ticks:{color:'#3d6080'}, grid:{color:'rgba(255,255,255,.04)'} } } };
+        [[bpRef,'bp',{type:'line',data:{labels:v.bp.map(x=>x.date),datasets:[{label:'Systolic',data:v.bp.map(x=>x.sys),borderColor:'#ff4560',backgroundColor:'rgba(255,69,96,.1)',tension:.4,fill:true},{label:'Diastolic',data:v.bp.map(x=>x.dia),borderColor:'#00d4ff',backgroundColor:'rgba(0,212,255,.1)',tension:.4,fill:true}]}}],[sugarRef,'sugar',{type:'line',data:{labels:v.sugar.map(x=>x.date),datasets:[{label:'Blood Sugar',data:v.sugar.map(x=>x.val),borderColor:'#ffab00',backgroundColor:'rgba(255,171,0,.1)',tension:.4,fill:true}]}}],[weightRef,'weight',{type:'line',data:{labels:v.weight.map(x=>x.date),datasets:[{label:'Weight (kg)',data:v.weight.map(x=>x.val),borderColor:'#00e676',backgroundColor:'rgba(0,230,118,.1)',tension:.4,fill:true}]}}]].forEach(([ref,key,cfg])=>{
+          if (!ref.current) return;
+          if (charts.current[key]) charts.current[key].destroy();
+          charts.current[key] = new Chart(ref.current, { ...cfg, options: opts });
+        });
+      }, [user.phone]);
+
+      useEffect(() => {
+        /* Seed default vitals if empty */
+        const v = API.patients.getVitals(user.phone);
+        if (!v.bp.length) {
+          ['Nov 1','Nov 8','Nov 15','Nov 22'].forEach((d,i)=>API.patients.addVital(user.phone,'bp',{date:d,sys:145-i*5,dia:95-i*4}));
+          ['Nov 5','Nov 12','Nov 19'].forEach((d,i)=>API.patients.addVital(user.phone,'sugar',{date:d,val:108+i*2-i*5}));
+          API.patients.addVital(user.phone,'weight',{date:'Oct',val:74});
+          API.patients.addVital(user.phone,'weight',{date:'Nov',val:72.5});
+        }
+        buildAll();
+      }, [buildAll]);
+
+      const log = (type) => {
+        const today = new Date().toLocaleDateString('en-IN',{month:'short',day:'numeric'});
+        if (type==='bp') {
+          if (!bpForm.sys||!bpForm.dia) { showToast('Enter both values','error'); return; }
+          API.patients.addVital(user.phone,'bp',{date:today,sys:+bpForm.sys,dia:+bpForm.dia});
+        } else if (type==='sugar') {
+          if (!sugarForm) { showToast('Enter value','error'); return; }
+          API.patients.addVital(user.phone,'sugar',{date:today,val:+sugarForm});
+        } else {
+          if (!weightForm) { showToast('Enter value','error'); return; }
+          API.patients.addVital(user.phone,'weight',{date:today,val:+weightForm});
+        }
+        showToast('Vital logged!','success');
+        buildAll();
+      };
+
+      return (
+        <div>
+          <div className="sec-hdr"><h2>📈 Health Trends</h2></div>
+          {[['Blood Pressure (mmHg)',bpRef,'bp',<><div className="form-group" style={{margin:0}}><label className="form-label">Systolic</label><input className="form-input" type="number" placeholder="120" value={bpForm.sys} onChange={e=>setBp(p=>({...p,sys:e.target.value}))}/></div><div className="form-group" style={{margin:0}}><label className="form-label">Diastolic</label><input className="form-input" type="number" placeholder="80" value={bpForm.dia} onChange={e=>setBp(p=>({...p,dia:e.target.value}))}/></div><button className="btn ob-cyan btn-sm" onClick={()=>log('bp')}>+ Log</button></>],
+            ['Blood Sugar (mg/dL)',sugarRef,'sugar',<><div className="form-group" style={{margin:0}}><label className="form-label">Value</label><input className="form-input" type="number" placeholder="90" value={sugarForm} onChange={e=>setSugar(e.target.value)}/></div><div/><button className="btn ob-amber btn-sm" onClick={()=>log('sugar')}>+ Log</button></>],
+            ['Weight (kg)',weightRef,'weight',<><div className="form-group" style={{margin:0}}><label className="form-label">Weight</label><input className="form-input" type="number" placeholder="70" value={weightForm} onChange={e=>setWeight(e.target.value)}/></div><div/><button className="btn ob-lime btn-sm" onClick={()=>log('weight')}>+ Log</button></>]].map(([title,ref,,logRow])=>(
+            <div className="chart-card" key={title}>
+              <div className="chart-title">{title}</div>
+              <div className="chart-wrap"><canvas ref={ref}></canvas></div>
+              <div className="vitals-log">{logRow}</div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    /* Patient — Temporary Access Sharing */
+    function PtShare({ user, showToast }) {
+      const [token,  setToken]  = useState(null);
+      const [expiry, setExpiry] = useState(null);
+
+      const generate = () => {
+        const res = API.tokens.generate(user.phone);
+        setToken(res.token); setExpiry(res.expiry);
+        showToast('Token generated!', 'success');
+      };
+
+      const revoke = () => {
+        if (token) API.tokens.revoke(token);
+        setToken(null);
+        showToast('Access revoked', 'success');
+      };
+
+      return (
+        <div>
+          <div className="sec-hdr"><h2>🔐 Temporary Access Sharing</h2></div>
+          <div className="info-banner">Generate a one-time token for any doctor. Auto-expires in 24 hours. You can revoke it any time.</div>
+          {token
+            ? <div style={{background:'rgba(124,77,255,.06)',border:'1px solid rgba(124,77,255,.2)',borderRadius:14,padding:20,marginBottom:16}}>
+                <div style={{fontSize:14,marginBottom:6}}>Active Token</div>
+                <div className="token-box">{token}</div>
+                <div style={{fontSize:12,color:'var(--amber)',marginTop:4}}>⏱️ Expires: {fmtDt(expiry)}</div>
+                <div style={{display:'flex',gap:10,marginTop:12}}>
+                  <button className="wa-btn" onClick={()=>API.shareWhatsApp(`🔐 MediCard Token: *${token}* — Valid 24h. Enter in Doctor Portal.`)}>📲 Share via WhatsApp</button>
+                  <button className="btn ob-red btn-sm" onClick={revoke}>🚫 Revoke</button>
+                </div>
+              </div>
+            : <button className="btn btn-purple" onClick={generate}>🔑 Generate Access Token</button>
+          }
+        </div>
+      );
+    }
+
+    /* Patient — MediBot AI */
+    function MediBot({ user, showToast }) {
+      const [msgs,   setMsgs]  = useState([{ role:'ai', text:'👋 Hi! I\'m <strong>MediBot</strong> powered by Gemini. I can read your actual medical records and answer health questions.\n\n⚙️ Add your Gemini API key to enable live AI responses.\n\n⚠️ <em>Always consult your doctor for medical decisions.</em>' }]);
+      const [input,  setInput] = useState('');
+      const [busy,   setBusy]  = useState(false);
+      const [apiKey, setKey]   = useState(localStorage.getItem('mc_geminiKey')||'');
+      const endRef = useRef(null);
+
+      useEffect(()=>{ endRef.current?.scrollIntoView({ behavior:'smooth' }); },[msgs]);
+
+      const addMsg = (role, text) => setMsgs(m=>[...m,{role,text}]);
+
+      const send = async () => {
+        const msg = input.trim(); if (!msg) return;
+        setInput(''); addMsg('user', msg); setBusy(true);
+        const records    = API.patients.getRecords(user.phone);
+        const labReports = API.patients.getLabReports(user.phone);
+        const prompt = `You are MediBot, a friendly AI health assistant for MediCard India.
+Patient: ${user.name}, Blood: ${user.blood}, Allergies: ${user.allergies}, Conditions: ${user.conditions}
+Records (${records.length}): ${records.map(r=>`[${r.date}] ${r.illness} Rx:${r.prescription}`).join('; ')}
+Lab Reports: ${labReports.map(r=>`${r.type}: ${r.summary}`).join('; ')||'none'}
+Question: ${msg}
+Be concise, warm, helpful. Recommend consulting doctor for medical decisions.`;
+        const reply = await callGemini(prompt);
+        addMsg('ai', reply); setBusy(false);
+      };
+
+      const saveKey = () => { localStorage.setItem('mc_geminiKey', apiKey); showToast('API key saved!','success'); };
+
+      const sugs = ['Summarize my health','My current medications','Any drug interactions?','Last follow-up date?','Explain my last diagnosis'];
+
+      return (
+        <div>
+          <div className="panel" style={{marginBottom:14}}>
+            <div style={{fontSize:12,color:'var(--t2)',marginBottom:8}}>🔑 Gemini API Key — <a href="https://aistudio.google.com" target="_blank">Get free key</a></div>
+            <div style={{display:'flex',gap:8}}>
+              <input className="search-input" type="password" placeholder="AIzaSy..." value={apiKey} onChange={e=>setKey(e.target.value)}/>
+              <button className="btn ob-cyan btn-sm" onClick={saveKey}>Save</button>
+            </div>
+          </div>
+          <div className="chatbot">
+            <div className="chat-hdr">
+              <div className="ai-icon">🤖</div>
+              <div><div style={{fontFamily:'Syne',fontSize:15,fontWeight:700,color:'var(--cyan)'}}>MediBot AI</div><div style={{fontSize:11,color:'var(--green)',display:'flex',alignItems:'center',gap:4}}><span style={{width:7,height:7,borderRadius:'50%',background:'var(--green)',display:'inline-block'}}></span> Online</div></div>
+              <div style={{marginLeft:'auto',fontSize:11,color:'var(--t2)'}}>Google Gemini</div>
+            </div>
+            <div className="chat-msgs">
+              {msgs.map((m,i)=>(
+                <div key={i} className={`chat-msg ${m.role}`}>
+                  <div className="chat-bubble" dangerouslySetInnerHTML={{__html:m.text.replace(/\n/g,'<br>')}}/>
+                  <div className="chat-time">{nowTime()}</div>
+                </div>
+              ))}
+              {busy && <div className="chat-msg ai"><div className="chat-bubble"><div className="typing-dots"><span/><span/><span/></div></div></div>}
+              <div ref={endRef}/>
+            </div>
+            <div className="chat-sugs">{sugs.map(s=><button key={s} className="chat-sug" onClick={()=>setInput(s)}>{s}</button>)}</div>
+            <div className="chat-inp-row">
+              <textarea className="chat-inp" rows={1} value={input} onChange={e=>setInput(e.target.value)} placeholder="Ask about your health..." onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}}/>
+              <button className="chat-send" onClick={send}>➤</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* Patient — Profile */
+    function PtProfile({ user }) {
+      return (
+        <div className="profile-layout">
+          <div className="profile-sidebar">
+            <div className="profile-avatar" style={{background:'linear-gradient(135deg,var(--cyan),var(--teal))'}}>👤</div>
+            <div className="profile-name">{user.name}</div>
+            <div className="profile-detail">📱 {user.phone}</div>
+            <div className="profile-detail">📍 {user.city}</div>
+            <div style={{marginTop:10}}><span className="vbadge">✓ OTP Verified</span></div>
+            <div className="divider"/>
+            <div style={{background:'rgba(255,69,96,.08)',border:'1px solid rgba(255,69,96,.18)',borderRadius:10,padding:12}}>
+              <div style={{fontSize:10,color:'var(--t3)',letterSpacing:1,textTransform:'uppercase',marginBottom:3}}>Blood Group</div>
+              <div style={{fontFamily:'Syne',fontSize:32,fontWeight:800,color:'var(--red)'}}>{user.blood||'—'}</div>
+            </div>
+          </div>
+          <div className="profile-fields">
+            <h3 style={{fontFamily:'Syne',fontSize:16,fontWeight:700,marginBottom:14}}>Personal Information</h3>
+            <FieldGrid fields={[['Name',user.name],['Phone',user.phone],['Date of Birth',user.dob||'—'],['Gender',user.gender||'—'],['City',user.city||'—'],['Blood Group',user.blood||'—'],['Height',(user.height||'—')+' cm'],['Weight',(user.weight||'—')+' kg'],['Allergies',user.allergies||'None'],['Conditions',user.conditions||'None'],['Emergency',user.emergency||'—']]}/>
+          </div>
+        </div>
+      );
+    }
+
+    /* ══════════════════════════════════════════
+       DOCTOR DASHBOARD
+    ══════════════════════════════════════════ */
+    function DoctorDashboard({ user, showToast }) {
+      const [tab, setTab] = useState('search');
+      const tabs = [['search','🔍 Patient Search'],['insights','📊 Insights'],['appts','📅 Appointments'],['profile','👤 Profile']];
+      return (
+        <div className="container">
+          <div className="dash-hdr">
+            <div><div className="dash-welcome">Dr. <span>{user.name}</span></div><div className="dash-meta">{user.spec} · {user.hospital}</div></div>
+            <div style={{display:'flex',gap:10,alignItems:'center'}}><span className="role-badge rb-dr">Doctor</span><span className="vbadge" style={{background:'rgba(0,212,255,.1)',color:'var(--cyan)',borderColor:'rgba(0,212,255,.2)'}}>✓ Med. Council Verified</span></div>
+          </div>
+          <div className="dash-tabs">{tabs.map(([id,lbl])=><button key={id} className={`dash-tab ${tab===id?'active':''}`} onClick={()=>setTab(id)}>{lbl}</button>)}</div>
+          {tab==='search'   && <DrSearch   doctor={user} showToast={showToast}/>}
+          {tab==='insights' && <DrInsights showToast={showToast}/>}
+          {tab==='appts'    && <DrAppts    doctor={user}/>}
+          {tab==='profile'  && <DrProfile  user={user}/>}
+        </div>
+      );
+    }
+
+    /* Doctor — Patient Search */
+    function DrSearch({ doctor, showToast }) {
+      const [q,       setQ]       = useState('');
+      const [tokenQ,  setTokenQ]  = useState('');
+      const [result,  setResult]  = useState(null);
+
+      const searchPhone = () => {
+        const res = API.doctors.searchPatient(q);
+        if (res.error) { showToast(res.error, 'error'); return; }
+        setResult(res);
+      };
+
+      const searchToken = () => {
+        const res = API.tokens.verify(tokenQ.toUpperCase());
+        if (res.error) { showToast(res.error, 'error'); return; }
+        setResult({ patient: res.patient, records: res.records, labReports: API.patients.getLabReports(res.patient.phone) });
+        showToast('✅ Token access granted', 'success');
+      };
+
+      return (
+        <div>
+          <div className="info-banner">Search patient by <strong style={{color:'var(--cyan)'}}>Phone Number</strong> or <strong style={{color:'var(--purple)'}}>Access Token</strong>.</div>
+          <div className="search-panel" style={{marginBottom:12}}>
+            <div className="search-bar">
+              <input className="search-input" type="tel" placeholder="Patient phone number..." value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>e.key==='Enter'&&searchPhone()}/>
+              <button className="btn btn-teal" onClick={searchPhone}>🔍 Search</button>
+            </div>
+          </div>
+          <div className="search-panel">
+            <div style={{fontSize:12,color:'var(--t2)',marginBottom:10}}>🔐 Or use patient's access token:</div>
+            <div className="search-bar">
+              <input className="search-input" placeholder="8-character token..." value={tokenQ} onChange={e=>setTokenQ(e.target.value)}/>
+              <button className="btn btn-purple" onClick={searchToken}>🔑 Use Token</button>
+            </div>
+          </div>
+          {result && <DrPatientResult result={result} doctor={doctor} showToast={showToast}/>}
+        </div>
+      );
+    }
+
+    /* Doctor — Patient Result Panel */
+    function DrPatientResult({ result, doctor, showToast }) {
+      const { patient, records: initRecords, labReports } = result;
+      const [records,   setRecords]   = useState(initRecords);
+      const [showForm,  setShowForm]  = useState(false);
+      const [form,      setForm]      = useState({ illness:'', symptoms:'', severity:'Mild', prescription:'', notes:'', date:new Date().toISOString().slice(0,10), followup:'' });
+      const [interWarn, setInterWarn] = useState(null);
+      const allMeds = records.map(r=>r.prescription).filter(Boolean).join(', ');
+      const sf = k => e => {
+        const val = e.target.value;
+        setForm(p=>({...p,[k]:val}));
+        if (k==='prescription') setInterWarn(checkInteraction(val, allMeds));
+      };
+
+      const save = () => {
+        if (!form.illness) { showToast('Enter illness / diagnosis', 'error'); return; }
+        API.patients.addRecord(patient.phone, { ...form, doctor:`Dr. ${doctor.name}`, hospital:doctor.hospital, spec:doctor.spec });
+        setRecords(API.patients.getRecords(patient.phone));
+        setShowForm(false);
+        showToast('Record saved!', 'success');
+      };
+
+      return (
+        <div className="card" style={{marginTop:16,borderColor:'rgba(0,212,255,.25)'}}>
+          <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:16,flexWrap:'wrap',gap:10}}>
+            <div>
+              <div style={{fontFamily:'Syne',fontSize:22,fontWeight:800}}>{patient.name}</div>
+              <div style={{fontSize:13,color:'var(--t2)'}}>🩸 {patient.blood} · {patient.gender} · 📍 {patient.city} · 📱 {patient.phone}</div>
+            </div>
+            <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+              <button className="btn ob-teal btn-sm" onClick={()=>setShowForm(s=>!s)}>+ Add Record</button>
+              <button className="wa-btn" onClick={()=>API.shareWhatsApp(`📋 Patient: ${patient.name}\nBlood: ${patient.blood}\nAllergies: ${patient.allergies}`)}>📲 WhatsApp</button>
+            </div>
+          </div>
+          <div className="fields-grid" style={{marginBottom:16}}>
+            {[['Blood',patient.blood],['Allergies',patient.allergies||'None'],['Conditions',patient.conditions||'None'],['Emergency',patient.emergency||'—']].map(([k,v])=>(
+              <div className="field-item" key={k}><div className="field-key">{k}</div><div className="field-value">{v}</div></div>
+            ))}
+          </div>
+
+          {/* Add Record form */}
+          {showForm && (
+            <div className="panel" style={{marginBottom:16}}>
+              <div style={{fontFamily:'Syne',fontSize:17,fontWeight:700,marginBottom:14}}>New Medical Record</div>
+              {interWarn && <div className="warn-banner"><span style={{fontSize:22}}>⚠️</span><div><strong style={{color:'var(--red)'}}>Drug Interaction Warning</strong><div>{interWarn}</div></div></div>}
+              <div className="form-row"><div className="form-group"><label className="form-label">Illness / Diagnosis</label><input className="form-input" placeholder="Diagnosis..." value={form.illness} onChange={sf('illness')}/></div><div className="form-group"><label className="form-label">Severity</label><select className="form-input" value={form.severity} onChange={sf('severity')}><option>Mild</option><option>Moderate</option><option>Severe</option><option>Critical</option></select></div></div>
+              <div className="form-group"><label className="form-label">Symptoms</label><input className="form-input" placeholder="Fever, headache..." value={form.symptoms} onChange={sf('symptoms')}/></div>
+              <div className="form-group"><label className="form-label">Prescription</label><input className="form-input" placeholder="Medicine + dosage" value={form.prescription} onChange={sf('prescription')}/></div>
+              <div className="form-group"><label className="form-label">Doctor Notes</label><textarea className="form-input form-textarea" placeholder="Clinical notes..." value={form.notes} onChange={sf('notes')}/></div>
+              <div className="form-row"><div className="form-group"><label className="form-label">Date</label><input className="form-input" type="date" value={form.date} onChange={sf('date')}/></div><div className="form-group"><label className="form-label">Follow-up Date</label><input className="form-input" type="date" value={form.followup} onChange={sf('followup')}/></div></div>
+              <div style={{display:'flex',gap:10}}><button className="btn btn-teal" onClick={save}>✅ Save Record</button><button className="btn btn-ghost btn-sm" onClick={()=>setShowForm(false)}>Cancel</button></div>
+            </div>
+          )}
+
+          <div className="sec-hdr" style={{marginBottom:10}}><h2 style={{fontSize:16}}>📋 Visit History ({records.length})</h2></div>
+          {records.length ? [...records].reverse().map(r=><RecordCard key={r.id} record={r}/>) : <Empty text="No records yet."/>}
+
+          {labReports?.length > 0 && (
+            <>
+              <div className="divider"/>
+              <div className="sec-hdr"><h2 style={{fontSize:16}}>🔬 Lab Reports ({labReports.length})</h2></div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:10}}>
+                {labReports.map((r,i)=>(
+                  <div key={i} style={{background:'var(--bg3)',border:'1px solid var(--border)',borderRadius:10,padding:14,textAlign:'center'}}>
+                    <div style={{fontSize:24,marginBottom:6}}>📋</div>
+                    <div style={{fontSize:12,fontWeight:600}}>{r.type}</div>
+                    <div style={{fontSize:11,color:'var(--t2)'}}>{r.date}</div>
+                    <div style={{fontSize:11,color:'var(--amber)'}}>{r.lab}</div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      );
+    }
+
+    /* Doctor — Patient Insights */
+    function DrInsights({ showToast }) {
+      const [q,       setQ]       = useState('');
+      const [insight, setInsight] = useState(null);
+
+      const search = () => {
+        const pt = API.patients.get(q);
+        if (pt.error) { showToast(pt.error, 'error'); return; }
+        const recs = API.patients.getRecords(q);
+        const illCount={}, medCount={};
+        recs.forEach(r => {
+          illCount[r.illness] = (illCount[r.illness]||0)+1;
+          if (r.prescription) r.prescription.split(',').forEach(m=>{ const n=m.trim(); medCount[n]=(medCount[n]||0)+1; });
+        });
+        setInsight({ pt, recs, illCount, medCount });
+      };
+
+      const RISK_STYLE = { HIGH:{ background:'rgba(255,69,96,.15)', color:'var(--red)' }, MEDIUM:{ background:'rgba(255,171,0,.15)', color:'var(--amber)' }, LOW:{ background:'rgba(0,230,118,.15)', color:'var(--green)' } };
+
+      return (
+        <div>
+          <div className="sec-hdr"><h2>📊 Patient Insights</h2></div>
+          <div className="search-panel">
+            <div className="search-bar">
+              <input className="search-input" type="tel" placeholder="Patient phone number..." value={q} onChange={e=>setQ(e.target.value)}/>
+              <button className="btn btn-teal" onClick={search}>🔍 Search</button>
+            </div>
+          </div>
+          {insight
+            ? <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:14}}>
+                <div className="card">
+                  <div style={{fontSize:12,color:'var(--t2)',letterSpacing:.8,textTransform:'uppercase',marginBottom:10}}>🦠 Frequent Illnesses</div>
+                  {Object.entries(insight.illCount).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([ill,cnt])=>(
+                    <div key={ill} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'7px 0',borderBottom:'1px solid rgba(255,255,255,.04)',fontSize:13}}>
+                      <span>{ill}</span><span style={{fontFamily:'JetBrains Mono',fontSize:13,fontWeight:600,color:'var(--cyan)',background:'rgba(0,212,255,.1)',padding:'2px 8px',borderRadius:6}}>{cnt}x</span>
+                    </div>
+                  ))}
+                  {!Object.keys(insight.illCount).length && <Empty text="No illness data."/>}
+                </div>
+                <div className="card">
+                  <div style={{fontSize:12,color:'var(--t2)',letterSpacing:.8,textTransform:'uppercase',marginBottom:10}}>💊 Repeated Prescriptions</div>
+                  {Object.entries(insight.medCount).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([med,cnt])=>(
+                    <div key={med} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'7px 0',borderBottom:'1px solid rgba(255,255,255,.04)',fontSize:13}}>
+                      <span>{med}</span><span style={{fontFamily:'JetBrains Mono',fontSize:13,fontWeight:600,color:'var(--teal)',background:'rgba(0,180,160,.1)',padding:'2px 8px',borderRadius:6}}>{cnt}x</span>
+                    </div>
+                  ))}
+                  {!Object.keys(insight.medCount).length && <Empty text="No prescription data."/>}
+                </div>
+                <div className="card">
+                  <div style={{fontSize:12,color:'var(--t2)',letterSpacing:.8,textTransform:'uppercase',marginBottom:10}}>⚠️ Risk Flags</div>
+                  {[
+                    [insight.pt.conditions?.toLowerCase().includes('hypertension'), 'Hypertension risk',    'HIGH'],
+                    [insight.pt.conditions?.toLowerCase().includes('diabetes'),     'Diabetic management', 'MEDIUM'],
+                    [insight.recs.length > 3,                                       'Recurring visits',    'REVIEW'],
+                  ].filter(([cond])=>cond).map(([,label,level])=>(
+                    <div key={label} style={{display:'flex',justifyContent:'space-between',padding:'7px 0',fontSize:13,borderBottom:'1px solid rgba(255,255,255,.04)'}}>
+                      <span>{label}</span>
+                      <span style={{padding:'3px 9px',borderRadius:100,fontSize:11,fontWeight:700,...(RISK_STYLE[level]||RISK_STYLE.MEDIUM)}}>{level}</span>
+                    </div>
+                  ))}
+                  {!insight.pt.conditions && <Empty text="No major flags."/>}
+                </div>
+              </div>
+            : <Empty text="Search a patient to view their health insights."/>
+          }
+        </div>
+      );
+    }
+
+    /* Doctor — Appointments */
+    function DrAppts({ doctor }) {
+      const appts = API.doctors.getAppointments(doctor.name);
+      return (
+        <div>
+          <div className="sec-hdr"><h2>📅 Upcoming Appointments</h2></div>
+          {appts.length
+            ? <div className="appt-grid">{appts.map((a,i)=>(
+                <div className="appt-card" key={i}>
+                  <div className="appt-time">📅 {fmtDt(a.datetime)}</div>
+                  <div className="appt-doc">👤 {a.ptName}</div>
+                  <div style={{fontSize:12,color:'var(--t2)',marginBottom:5}}>📱 {a.ptPhone}</div>
+                  <div style={{fontSize:12,color:'var(--t2)'}}>📝 {a.reason}</div>
+                  <div style={{marginTop:10}}><span className="appt-status s-conf">Confirmed</span></div>
+                </div>
+              ))}</div>
+            : <Empty text="No upcoming appointments."/>
+          }
+        </div>
+      );
+    }
+
+    /* Doctor — Profile */
+    function DrProfile({ user }) {
+      return (
+        <div className="profile-layout">
+          <div className="profile-sidebar">
+            <div className="profile-avatar" style={{background:'linear-gradient(135deg,var(--teal),var(--cyan))'}}>👨‍⚕️</div>
+            <div className="profile-name">Dr. {user.name}</div>
+            <div className="profile-detail" style={{color:'var(--teal)'}}>{user.spec}</div>
+            <div className="profile-detail">🏥 {user.hospital}</div>
+            <div style={{marginTop:10}}><span className="vbadge" style={{background:'rgba(0,212,255,.1)',color:'var(--cyan)',borderColor:'rgba(0,212,255,.2)'}}>✓ Med. Council Verified</span></div>
+            <div className="divider"/>
+            <div style={{background:'rgba(0,180,160,.08)',border:'1px solid rgba(0,180,160,.18)',borderRadius:10,padding:12}}>
+              <div style={{fontSize:10,color:'var(--t3)',letterSpacing:1,textTransform:'uppercase',marginBottom:3}}>Consultation Fee</div>
+              <div style={{fontFamily:'Syne',fontSize:28,fontWeight:800,color:'var(--teal)'}}>₹{user.fee}</div>
+            </div>
+          </div>
+          <div className="profile-fields">
+            <h3 style={{fontFamily:'Syne',fontSize:16,fontWeight:700,marginBottom:14}}>Professional Information</h3>
+            <FieldGrid fields={[['Degree',user.degree],['Specialization',user.spec],['Experience',user.exp+' years'],['Hospital',user.hospital],['Reg. Number',user.regnum],['Fee','₹'+user.fee],['Phone',user.phone]]}/>
+          </div>
+        </div>
+      );
+    }
+
+    /* ══════════════════════════════════════════
+       LAB DASHBOARD
+    ══════════════════════════════════════════ */
+    function LabDashboard({ user, showToast }) {
+      const [tab, setTab] = useState('upload');
+      const tabs = [['upload','📤 Upload'],['history','📁 History'],['profile','🔬 Profile']];
+      return (
+        <div className="container">
+          <div className="dash-hdr">
+            <div><div className="dash-welcome">🔬 <span>{user.name}</span></div><div className="dash-meta">📍 {user.city} · Reg: {user.reg}</div></div>
+            <div style={{display:'flex',gap:10,alignItems:'center'}}><span className="role-badge rb-lb">Laboratory</span><span className="vbadge" style={{background:'rgba(255,171,0,.1)',color:'var(--amber)',borderColor:'rgba(255,171,0,.2)'}}>✓ Govt. Certified</span></div>
+          </div>
+          <div className="dash-tabs">{tabs.map(([id,lbl])=><button key={id} className={`dash-tab ${tab===id?'active':''}`} onClick={()=>setTab(id)}>{lbl}</button>)}</div>
+          {tab==='upload'  && <LabUpload   lab={user} showToast={showToast}/>}
+          {tab==='history' && <LabHistory  lab={user}/>}
+          {tab==='profile' && <LabProfile  user={user}/>}
+        </div>
+      );
+    }
+
+    function LabUpload({ lab, showToast }) {
+      const [phone,   setPhone]   = useState('');
+      const [patient, setPatient] = useState(null);
+      const [form,    setForm]    = useState({ type:'Blood Test — CBC', date:new Date().toISOString().slice(0,10), summary:'', notes:'' });
+      const sf = k => e => setForm(p=>({...p,[k]:e.target.value}));
+
+      const find = () => {
+        const pt = API.patients.get(phone);
+        if (pt.error) { showToast(pt.error, 'error'); return; }
+        setPatient(pt); showToast('Patient found: '+pt.name, 'success');
+      };
+
+      const upload = () => {
+        if (!patient) { showToast('Search a patient first', 'error'); return; }
+        API.labs.uploadReport(lab.phone, phone, form);
+        showToast('Report uploaded to patient profile!', 'success');
+      };
+
+      const TYPES = ['Blood Test — CBC','Blood Test — Lipid Profile','Blood Test — Thyroid','Blood Test — HbA1c','Blood Test — LFT','Blood Test — KFT','Urine Analysis','X-Ray','MRI Scan','CT Scan','ECG','Ultrasound','COVID RT-PCR','Other'];
+
+      return (
+        <div>
+          <div className="info-banner">Search patient by <strong style={{color:'var(--amber)'}}>Phone Number</strong> then upload their report.</div>
+          <div className="search-panel" style={{marginBottom:patient?16:0}}>
+            <div className="search-bar">
+              <input className="search-input" type="tel" placeholder="Patient phone number..." value={phone} onChange={e=>setPhone(e.target.value)}/>
+              <button className="btn btn-amber" onClick={find}>🔍 Find Patient</button>
+            </div>
+          </div>
+          {patient && (
+            <div className="card" style={{borderColor:'rgba(255,171,0,.25)'}}>
+              <div style={{fontFamily:'Syne',fontSize:20,fontWeight:800,marginBottom:4}}>{patient.name} <span className="vbadge">✓ Found</span></div>
+              <div style={{fontSize:13,color:'var(--t2)',marginBottom:18}}>🩸 {patient.blood} · {patient.gender} · 📍 {patient.city}</div>
+              <div className="form-group"><label className="form-label">Report Type</label><select className="form-input" value={form.type} onChange={sf('type')}>{TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
+              <div className="form-row"><div className="form-group"><label className="form-label">Test Date</label><input className="form-input" type="date" value={form.date} onChange={sf('date')}/></div><div className="form-group"><label className="form-label">Result Summary</label><input className="form-input" placeholder="Normal / Abnormal..." value={form.summary} onChange={sf('summary')}/></div></div>
+              <div className="form-group"><label className="form-label">Notes</label><textarea className="form-input form-textarea" placeholder="Lab notes..." value={form.notes} onChange={sf('notes')}/></div>
+              <div className="upload-zone" style={{marginBottom:14,padding:20}} onClick={()=>showToast('File attach ready (demo)','info')}><div>📁 Click to attach PDF or image</div></div>
+              <div style={{display:'flex',gap:10}}>
+                <button className="btn btn-amber" onClick={upload}>📤 Upload to Patient Profile</button>
+                <button className="wa-btn" onClick={()=>API.shareWhatsApp(`🔬 ${lab.name}: Your ${form.type} result is ready on MediCard.`)}>📲 Notify Patient</button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function LabHistory({ lab }) {
+      const history = API.labs.getHistory(lab.phone);
+      return (
+        <div>
+          <div className="sec-hdr"><h2>📁 Upload History</h2></div>
+          {history.length
+            ? [...history].reverse().map((h,i)=>(
+                <div className="record-card" key={i}>
+                  <div style={{display:'flex',justifyContent:'space-between',marginBottom:8}}><div className="record-title">📋 {h.type}</div><div className="record-date">{h.date}</div></div>
+                  <div className="tags-row"><span className="tag tag-amber">🔬 {h.lab}</span><span className="tag tag-cyan">👤 {h.patientName||'Patient'}</span></div>
+                  <div className="record-body">{h.summary&&<><strong>Summary:</strong> {h.summary}<br/></>}{h.notes&&<><strong>Notes:</strong> {h.notes}</>}</div>
+                </div>
+              ))
+            : <Empty text="No uploads yet."/>
+          }
+        </div>
+      );
+    }
+
+    function LabProfile({ user }) {
+      return (
+        <div className="profile-layout">
+          <div className="profile-sidebar">
+            <div className="profile-avatar" style={{background:'linear-gradient(135deg,var(--amber),#e65100)'}}>🔬</div>
+            <div className="profile-name">{user.name}</div>
+            <div className="profile-detail">📍 {user.city}</div>
+            <div style={{marginTop:10}}><span className="vbadge" style={{background:'rgba(255,171,0,.1)',color:'var(--amber)',borderColor:'rgba(255,171,0,.2)'}}>✓ Govt. Certified</span></div>
+          </div>
+          <div className="profile-fields">
+            <FieldGrid fields={[['Lab Name',user.name],['City',user.city],['Registration',user.reg],['Tests Offered',user.tests],['Established',user.established],['Phone',user.phone]]}/>
+          </div>
+        </div>
+      );
+    }
+
+    /* ══════════════════════════════════════════
+       PHARMACIST DASHBOARD
+    ══════════════════════════════════════════ */
+    function PharmacistDashboard({ user, showToast }) {
+      const [tab, setTab] = useState('prescriptions');
+      const tabs = [['prescriptions','💊 Prescriptions'],['inventory','📦 Inventory'],['dispenseLog','📋 Dispense Log'],['profile','🏪 Profile']];
+      return (
+        <div className="container">
+          <div className="dash-hdr">
+            <div><div className="dash-welcome">💊 <span>{user.shopName||user.name}</span></div><div className="dash-meta">{user.name} · {user.city} · License: {user.licenseNo}</div></div>
+            <div style={{display:'flex',gap:10,alignItems:'center',flexWrap:'wrap'}}><span className="role-badge rb-ph">Pharmacist</span><span className="vbadge" style={{background:'rgba(178,255,89,.1)',color:'var(--lime)',borderColor:'rgba(178,255,89,.2)'}}>✓ Drug License Verified</span></div>
+          </div>
+          <div className="dash-tabs">{tabs.map(([id,lbl])=><button key={id} className={`dash-tab ${tab===id?'active':''}`} onClick={()=>setTab(id)}>{lbl}</button>)}</div>
+          {tab==='prescriptions' && <PharmaPrescriptions pharma={user} showToast={showToast}/>}
+          {tab==='inventory'     && <PharmaInventory     pharma={user} showToast={showToast}/>}
+          {tab==='dispenseLog'   && <PharmaDispenseLog   pharma={user}/>}
+          {tab==='profile'       && <PharmaProfile       user={user}/>}
+        </div>
+      );
+    }
+
+    /* Pharmacist — View Prescriptions & Dispense */
+    function PharmaPrescriptions({ pharma, showToast }) {
+      const [q,        setQ]        = useState('');
+      const [result,   setResult]   = useState(null);
+      const [selected, setSelected] = useState({});  // key → boolean
+
+      const search = () => {
+        const res = API.pharmacists.getPatientPrescriptions(q);
+        if (res.error) { showToast(res.error, 'error'); return; }
+        setResult(res); setSelected({});
+        showToast('Patient found: '+res.patient.name, 'success');
+      };
+
+      const toggle = key => setSelected(s=>({...s,[key]:!s[key]}));
+
+      const dispense = () => {
+        const medicines = Object.entries(selected).filter(([,v])=>v).map(([k])=>k);
+        if (!medicines.length) { showToast('Select at least one medicine', 'error'); return; }
+        API.pharmacists.dispense(pharma.phone, { patientPhone: q, medicines });
+        setSelected({});
+        showToast(`✅ ${medicines.length} medicine(s) dispensed`, 'success');
+      };
+
+      const selectedCount = Object.values(selected).filter(Boolean).length;
+
+      /* Check inventory status for a medicine name */
+      const stockOf = (medName) => {
+        const inv  = API.pharmacists.getInventory(pharma.phone);
+        return inv.find(i => i.name.toLowerCase().includes(medName.toLowerCase().split(' ')[0]));
+      };
+
+      return (
+        <div>
+          <div className="info-banner">Search patient by <strong style={{color:'var(--lime)'}}>Phone Number</strong> to view prescriptions and mark medicines as dispensed.</div>
+          <div className="search-panel">
+            <div className="search-bar">
+              <input className="search-input" type="tel" placeholder="Patient phone number..." value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>e.key==='Enter'&&search()}/>
+              <button className="btn btn-lime" onClick={search}>🔍 Search</button>
+            </div>
+          </div>
+
+          {result && (
+            <div className="card" style={{borderColor:'rgba(178,255,89,.25)'}}>
+              {/* Patient info */}
+              <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:16,flexWrap:'wrap',gap:10}}>
+                <div>
+                  <div style={{fontFamily:'Syne',fontSize:22,fontWeight:800}}>{result.patient.name}</div>
+                  <div style={{fontSize:13,color:'var(--t2)'}}>🩸 {result.patient.blood} · {result.patient.gender} · 📍 {result.patient.city}</div>
+                  <div style={{fontSize:12,color:'var(--t3)',marginTop:3}}>⚠️ Allergies: {result.patient.allergies||'None'}</div>
+                </div>
+                <span className="vbadge">✓ Identity Verified</span>
+              </div>
+
+              {/* Prescriptions */}
+              {!result.prescriptions.length && <Empty text="No prescriptions found for this patient."/>}
+              {result.prescriptions.map(rx => (
+                <div className="rx-row" key={rx.visitId}>
+                  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
+                    <div><span style={{fontFamily:'Syne',fontSize:15,fontWeight:700}}>{rx.illness}</span><span className="tag tag-cyan" style={{marginLeft:8,fontSize:11}}>{rx.doctor}</span></div>
+                    <span style={{fontFamily:'JetBrains Mono',fontSize:11,color:'var(--t2)'}}>{rx.date}</span>
+                  </div>
+                  <div style={{fontSize:12,color:'var(--t2)',letterSpacing:.5,textTransform:'uppercase',marginBottom:8}}>Select medicines to dispense:</div>
+                  {rx.medicines.map(med => {
+                    const key  = `${rx.visitId}__${med}`;
+                    const item = stockOf(med);
+                    const oos  = item?.status === 'Out of Stock';
+                    return (
+                      <div className="med-check" key={key} style={{opacity:oos?.5:1}}>
+                        <input type="checkbox" checked={!!selected[key]} disabled={oos} onChange={()=>toggle(key)}/>
+                        <span style={{flex:1,fontSize:14}}>{med}</span>
+                        {item
+                          ? <span className={`tag ${item.status==='In Stock'?'tag-green':item.status==='Low Stock'?'tag-amber':'tag-red'}`}>{item.status} {item.stock>0?`(${item.stock})`:'(0)'}</span>
+                          : <span className="tag tag-amber">Not in inventory</span>
+                        }
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+
+              {/* Dispense confirmation */}
+              {selectedCount > 0 && (
+                <div className="dispense-box">
+                  <div style={{fontFamily:'Syne',fontSize:15,fontWeight:700,color:'var(--lime)',marginBottom:8}}>✅ {selectedCount} medicine(s) selected</div>
+                  <div style={{display:'flex',gap:10}}>
+                    <button className="btn btn-lime" onClick={dispense}>💊 Confirm Dispense</button>
+                    <button className="wa-btn" onClick={()=>API.shareWhatsApp(`💊 ${pharma.shopName}: Your prescription is ready. Please visit.`)}>📲 Notify Patient</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    /* Pharmacist — Inventory Manager */
+    function PharmaInventory({ pharma, showToast }) {
+      const [meds,    setMeds]    = useState(API.pharmacists.getInventory(pharma.phone));
+      const [showAdd, setShowAdd] = useState(false);
+      const [editId,  setEditId]  = useState(null);
+      const [editVal, setEditVal] = useState({});
+      const [newMed,  setNewMed]  = useState({ name:'', category:'', stock:0, unit:'Tablet', price:0, status:'In Stock' });
+
+      const refresh = () => setMeds(API.pharmacists.getInventory(pharma.phone));
+
+      const addMed = () => {
+        if (!newMed.name) { showToast('Enter medicine name', 'error'); return; }
+        API.pharmacists.addMedicine(pharma.phone, newMed);
+        refresh(); setShowAdd(false);
+        setNewMed({ name:'', category:'', stock:0, unit:'Tablet', price:0, status:'In Stock' });
+        showToast('Medicine added!', 'success');
+      };
+
+      const updateStock = (id) => {
+        const stock = parseInt(editVal[id]) || 0;
+        API.pharmacists.updateMedicine(pharma.phone, id, { stock, status: stock===0?'Out of Stock':stock<50?'Low Stock':'In Stock' });
+        refresh(); setEditId(null);
+        showToast('Stock updated!', 'success');
+      };
+
+      const deleteMed = (id) => {
+        API.pharmacists.deleteMedicine(pharma.phone, id);
+        refresh(); showToast('Medicine removed', 'success');
+      };
+
+      const STATUS_COLOR = { 'In Stock':'var(--green)', 'Low Stock':'var(--amber)', 'Out of Stock':'var(--red)' };
+      const STATUS_BG    = { 'In Stock':'rgba(0,230,118,.12)', 'Low Stock':'rgba(255,171,0,.12)', 'Out of Stock':'rgba(255,69,96,.12)' };
+      const nm = k => e => setNewMed(p=>({...p,[k]:e.target.value}));
+
+      return (
+        <div>
+          <div className="sec-hdr"><h2>📦 Medicine Inventory</h2><button className="btn ob-lime btn-sm" onClick={()=>setShowAdd(s=>!s)}>+ Add Medicine</button></div>
+
+          {/* Add form */}
+          {showAdd && (
+            <div className="panel" style={{marginBottom:16}}>
+              <div style={{fontFamily:'Syne',fontSize:17,fontWeight:700,marginBottom:14}}>Add New Medicine</div>
+              <div className="form-row"><div className="form-group"><label className="form-label">Medicine Name</label><input className="form-input" placeholder="Paracetamol 650mg" value={newMed.name} onChange={nm('name')}/></div><div className="form-group"><label className="form-label">Category</label><input className="form-input" placeholder="Analgesic..." value={newMed.category} onChange={nm('category')}/></div></div>
+              <div className="form-row"><div className="form-group"><label className="form-label">Stock Qty</label><input className="form-input" type="number" placeholder="200" value={newMed.stock} onChange={e=>setNewMed(p=>({...p,stock:+e.target.value}))}/></div><div className="form-group"><label className="form-label">Unit</label><select className="form-input" value={newMed.unit} onChange={nm('unit')}><option>Tablet</option><option>Capsule</option><option>Syrup (ml)</option><option>Injection</option><option>Cream (g)</option><option>Drops</option></select></div></div>
+              <div className="form-row"><div className="form-group"><label className="form-label">Price per Unit (₹)</label><input className="form-input" type="number" step="0.1" placeholder="2.50" value={newMed.price} onChange={e=>setNewMed(p=>({...p,price:+e.target.value}))}/></div><div className="form-group"><label className="form-label">Status</label><select className="form-input" value={newMed.status} onChange={nm('status')}><option>In Stock</option><option>Low Stock</option><option>Out of Stock</option></select></div></div>
+              <div style={{display:'flex',gap:10}}><button className="btn btn-lime" onClick={addMed}>✅ Add to Inventory</button><button className="btn btn-ghost btn-sm" onClick={()=>setShowAdd(false)}>Cancel</button></div>
+            </div>
+          )}
+
+          {/* Summary metrics */}
+          <div className="metrics-grid" style={{marginBottom:18}}>
+            {[['📦','var(--lime)',meds.length,'Total'],['✅','var(--green)',meds.filter(m=>m.status==='In Stock').length,'In Stock'],['⚡','var(--amber)',meds.filter(m=>m.status==='Low Stock').length,'Low Stock'],['❌','var(--red)',meds.filter(m=>m.status==='Out of Stock').length,'Out of Stock']].map(([icon,color,val,lbl])=>(
+              <div className="metric-card" key={lbl}><div className="metric-icon" style={{background:`${color}22`}}>{icon}</div><div><div className="metric-val" style={{color}}>{val}</div><div className="metric-lbl">{lbl}</div></div></div>
+            ))}
+          </div>
+
+          {/* Inventory table */}
+          {meds.length
+            ? <div className="card" style={{overflowX:'auto',padding:0}}>
+                <table className="inv-table">
+                  <thead><tr><th>Medicine</th><th>Category</th><th>Stock</th><th>Unit</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+                  <tbody>
+                    {meds.map(m => (
+                      <tr key={m.id}>
+                        <td style={{fontWeight:600}}>{m.name}</td>
+                        <td style={{color:'var(--t2)'}}>{m.category}</td>
+                        <td>
+                          {editId===m.id
+                            ? <div style={{display:'flex',gap:6,alignItems:'center'}}>
+                                <input className="form-input" type="number" style={{width:80,padding:'6px 10px'}} value={editVal[m.id]??m.stock} onChange={e=>setEditVal(s=>({...s,[m.id]:e.target.value}))}/>
+                                <button className="btn ob-lime btn-sm" onClick={()=>updateStock(m.id)}>✓</button>
+                              </div>
+                            : <div style={{display:'flex',alignItems:'center',gap:8}}>
+                                <span style={{fontFamily:'JetBrains Mono',fontSize:13}}>{m.stock}</span>
+                                <div className="stock-bar-bg" style={{width:60}}>
+                                  <div className="stock-bar" style={{width:Math.min(100,(m.stock/500)*100)+'%',background:m.status==='In Stock'?'var(--green)':m.status==='Low Stock'?'var(--amber)':'var(--red)'}}/>
+                                </div>
+                              </div>
+                          }
+                        </td>
+                        <td style={{color:'var(--t2)'}}>{m.unit}</td>
+                        <td style={{fontFamily:'JetBrains Mono',fontSize:12}}>₹{m.price}</td>
+                        <td><span style={{padding:'3px 9px',borderRadius:100,fontSize:11,fontWeight:700,background:STATUS_BG[m.status],color:STATUS_COLOR[m.status]}}>{m.status}</span></td>
+                        <td>
+                          <div style={{display:'flex',gap:6}}>
+                            <button className="btn ob-lime btn-sm" style={{padding:'5px 10px'}} onClick={()=>{ setEditId(m.id); setEditVal(s=>({...s,[m.id]:m.stock})); }}>✏️ Edit</button>
+                            <button className="btn ob-red btn-sm"  style={{padding:'5px 10px'}} onClick={()=>deleteMed(m.id)}>🗑️</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            : <Empty text="No medicines. Add your first medicine above."/>
+          }
+        </div>
+      );
+    }
+
+    /* Pharmacist — Dispense Log */
+    function PharmaDispenseLog({ pharma }) {
+      const logs = API.pharmacists.getDispenseHistory(pharma.phone);
+      return (
+        <div>
+          <div className="sec-hdr"><h2>📋 Dispense History</h2></div>
+          {logs.length
+            ? [...logs].reverse().map(log=>(
+                <div className="record-card" key={log.id}>
+                  <div style={{display:'flex',justifyContent:'space-between',marginBottom:8}}>
+                    <div className="record-title">💊 {log.patientName}</div>
+                    <div className="record-date">{fmtDt(log.dispensedAt)}</div>
+                  </div>
+                  <div className="tags-row">{log.medicines.map((m,i)=><span key={i} className="tag tag-lime">{m.split('__')[1]||m}</span>)}</div>
+                  <div className="record-body"><strong>Pharmacist:</strong> {log.pharmacist} · {log.shopName}</div>
+                </div>
+              ))
+            : <Empty text="No dispense records yet."/>
+          }
+        </div>
+      );
+    }
+
+    /* Pharmacist — Profile */
+    function PharmaProfile({ user }) {
+      return (
+        <div className="profile-layout">
+          <div className="profile-sidebar">
+            <div className="profile-avatar" style={{background:'linear-gradient(135deg,var(--lime),#558b2f)'}}>🏪</div>
+            <div className="profile-name">{user.shopName||user.name}</div>
+            <div className="profile-detail">💊 {user.name}</div>
+            <div className="profile-detail">📍 {user.city}</div>
+            <div style={{marginTop:10}}><span className="vbadge" style={{background:'rgba(178,255,89,.1)',color:'var(--lime)',borderColor:'rgba(178,255,89,.2)'}}>✓ Drug License Verified</span></div>
+          </div>
+          <div className="profile-fields">
+            <FieldGrid fields={[['Pharmacist',user.name],['Shop Name',user.shopName],['Phone',user.phone],['City',user.city],['License No.',user.licenseNo]]}/>
+          </div>
+        </div>
+      );
+    }
+
+    /* ══════════════════════════════════════════
+       LANDING PAGE
+    ══════════════════════════════════════════ */
+    function LandingPage({ onOpen }) {
+      const FEATS = [
+        { icon:'🆘', bg:'rgba(255,69,96,.12)',  title:'Emergency Mode',         desc:'One-tap card shows blood group, allergies, medicines & contact — even to strangers.' },
+        { icon:'📸', bg:'rgba(0,212,255,.1)',    title:'AI Rx Scanner',          desc:'Upload handwritten prescription — AI extracts medicine, dosage & date in seconds.' },
+        { icon:'💊', bg:'rgba(178,255,89,.12)', title:'Pharmacist Portal',       desc:'View prescriptions, mark dispensed medicines, manage full drug inventory.' },
+        { icon:'🧠', bg:'rgba(124,77,255,.12)', title:'Gemini AI Health Bot',    desc:'Reads YOUR records and answers personalized health questions.' },
+        { icon:'📈', bg:'rgba(0,230,118,.12)',  title:'Health Trends',           desc:'Track BP, sugar, weight over time with live charts.' },
+        { icon:'⚠️', bg:'rgba(255,171,0,.12)',  title:'Drug Interaction Alert',  desc:'Warns instantly if a new prescription conflicts with existing medicines.' },
+        { icon:'📲', bg:'rgba(37,211,102,.12)', title:'WhatsApp Sharing',        desc:'Share prescriptions, reports & reminders via WhatsApp instantly.' },
+        { icon:'🔐', bg:'rgba(124,77,255,.1)',  title:'24-Hour Access Tokens',   desc:'Give any doctor temporary access — auto-revokes, fully private.' },
+        { icon:'🔬', bg:'rgba(255,171,0,.1)',   title:'Lab Report Integration',  desc:'Certified labs upload reports directly to patient profiles.' },
+      ];
+      return (
+        <div>
+          <div className="hero">
+            <div className="ecg-line"><svg viewBox="0 0 1400 70" width="100%" height="70" preserveAspectRatio="none"><path className="ecg-path" d="M0,35 L120,35 L160,5 L180,65 L200,35 L340,35 L380,5 L400,65 L420,35 L560,35 L600,5 L620,65 L640,35 L780,35 L820,5 L840,65 L860,35 L1000,35 L1040,5 L1060,65 L1080,35 L1220,35 L1260,5 L1280,65 L1300,35 L1400,35"/></svg></div>
+            <div className="hero-badge">🛡️ OTP Verified · AI-Powered · Secure</div>
+            <h1 className="hero-title"><span className="line1">Your Medical</span><span className="line2">Passport</span></h1>
+            <p className="hero-sub">One platform for patients, doctors, labs & pharmacists. AI-powered records, emergency access, prescription scanning and smart dispensing.</p>
+            <div className="hero-btns">
+              <button className="cta cta-p" onClick={()=>onOpen('patient')}>👤 I'm a Patient</button>
+              <button className="cta cta-c" onClick={()=>onOpen('doctor')}>👨‍⚕️ I'm a Doctor</button>
+              <button className="cta cta-a" onClick={()=>onOpen('lab')}>🔬 I'm a Lab</button>
+              <button className="cta cta-l" onClick={()=>onOpen('pharmacist')}>💊 I'm a Pharmacist</button>
+            </div>
+          </div>
+          <div className="stats-bar">
+            <div className="stats-grid">
+              {[['2.4M+','Patients'],['85K+','Doctors'],['12K+','Certified Labs'],['8K+','Pharmacies'],['99.9%','Uptime']].map(([n,l])=>(
+                <div key={l}><div className="stat-num">{n}</div><div className="stat-lbl">{l}</div></div>
+              ))}
+            </div>
+          </div>
+          <div className="feat-sec">
+            <div className="sec-t">Built for Real Healthcare</div>
+            <div className="sec-s">From AI prescription scanning to pharmacist dispensing management</div>
+            <div className="feat-grid">
+              {FEATS.map(f=>(
+                <div className="feat-card" key={f.title}>
+                  <div className="feat-icon" style={{background:f.bg}}>{f.icon}</div>
+                  <h3>{f.title}</h3>
+                  <p>{f.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ══════════════════════════════════════════
+       NAVBAR
+    ══════════════════════════════════════════ */
+    function Navbar({ session, onOpen, onLogout, onEmergency }) {
+      return (
+        <nav>
+          <div className="nav-inner">
+            <div className="logo" onClick={session ? onLogout : ()=>{}}>
+              <div className="logo-icon">⚕️</div>
+              <div><div className="logo-name">MediCard</div><div className="logo-sub">Digital Health Platform</div></div>
+            </div>
+            <div className="nav-btns">
+              {!session ? (
+                <>
+                  <button className="nav-btn nb-pt" onClick={()=>onOpen('patient')}>    <span className="nav-dot"/><span className="lbl">Patient</span></button>
+                  <button className="nav-btn nb-dr" onClick={()=>onOpen('doctor')}>     <span className="nav-dot"/><span className="lbl">Doctor</span></button>
+                  <button className="nav-btn nb-lb" onClick={()=>onOpen('lab')}>        <span className="nav-dot"/><span className="lbl">Lab</span></button>
+                  <button className="nav-btn nb-ph" onClick={()=>onOpen('pharmacist')}> <span className="nav-dot"/><span className="lbl">Pharmacy</span></button>
+                </>
+              ) : (
+                <>
+                  {session.role==='patient' && <button className="nav-btn nb-em" onClick={onEmergency}>🆘 Emergency</button>}
+                  <button className="nav-btn nb-lo" onClick={onLogout}>⏻ Logout</button>
+                </>
+              )}
+            </div>
+          </div>
+        </nav>
+      );
+    }
+
+    /* ══════════════════════════════════════════
+       ROOT APP
+    ══════════════════════════════════════════ */
+    function App() {
+      const [session,   setSession]   = useState(null);   // { role, phone, user }
+      const [modal,     setModal]     = useState(null);   // role string
+      const [emergency, setEmergency] = useState(false);
+      const [toast,     setToast]     = useState({ msg:'', type:'success', show:false });
+
+      /* Show toast for 3.2 seconds */
+      const showToast = useCallback((msg, type='success') => {
+        setToast({ msg, type, show:true });
+        setTimeout(() => setToast(t=>({...t,show:false})), 3200);
+      }, []);
+
+      const handleLogin = (role, phone, user) => {
+        setSession({ role, phone, user });
+        setModal(null);
+        showToast(`Welcome, ${user.name||user.shopName}!`, 'success');
+      };
+
+      const handleLogout = () => { setSession(null); showToast('Logged out', 'success'); };
+
+      return (
+        <div>
+          <Navbar session={session} onOpen={setModal} onLogout={handleLogout} onEmergency={()=>setEmergency(true)}/>
+
+          <div className="page">
+            {!session                    && <LandingPage            onOpen={setModal}/>}
+            {session?.role==='patient'   && <PatientDashboard       user={session.user} showToast={showToast}/>}
+            {session?.role==='doctor'    && <DoctorDashboard         user={session.user} showToast={showToast}/>}
+            {session?.role==='lab'       && <LabDashboard            user={session.user} showToast={showToast}/>}
+            {session?.role==='pharmacist'&& <PharmacistDashboard     user={session.user} showToast={showToast}/>}
+          </div>
+
+          {modal    && <AuthModal role={modal} onClose={()=>setModal(null)} onLogin={handleLogin} showToast={showToast}/>}
+          {emergency && session?.role==='patient' && <EmergencyOverlay patient={session.user} onClose={()=>setEmergency(false)}/>}
+          <Toast message={toast.msg} type={toast.type} show={toast.show}/>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>
