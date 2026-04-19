@@ -390,10 +390,10 @@
       function seed() {
         if (store.get('seeded')) return;
 
-        store.set('patient_9876543210', { name:'Arjun Sharma', phone:'9876543210', dob:'1990-05-15', gender:'Male', city:'New Delhi', blood:'O+', height:'175', weight:'72', allergies:'Penicillin, Dust', conditions:'Mild Hypertension, Pre-Diabetes', emergency:'Priya Sharma — 9876543211' });
-        store.set('doctor_9988776655',  { name:'Kavita Mehta', phone:'9988776655', degree:'MBBS, MD (Cardiology)', spec:'Cardiologist', exp:'14', hospital:'Apollo Hospital, Delhi', regnum:'DL-MCI-4521', fee:'800' });
+        store.set('patient_9876543210', { name:'sudhanshu shukla', phone:'9876543210', dob:'1990-05-15', gender:'Male', city:'New Delhi', blood:'O+', height:'175', weight:'72', allergies:'Penicillin, Dust', conditions:'Mild Hypertension, Pre-Diabetes', emergency:'Priya Sharma — 9876543211' });
+        store.set('doctor_9988776655',  { name:'manish gupta', phone:'9988776655', degree:'MBBS, MD (Cardiology)', spec:'Cardiologist', exp:'14', hospital:'Apollo Hospital, Delhi', regnum:'DL-MCI-4521', fee:'800' });
         store.set('lab_8877665544',     { name:'LifeCare Diagnostics', phone:'8877665544', city:'Mumbai', reg:'LAB-MH-001', tests:'Blood CBC, Lipid, X-Ray, MRI, ECG', established:'2010' });
-        store.set('pharmacist_7766554433', { name:'Suresh Patel', phone:'7766554433', shopName:'MediPlus Pharmacy', city:'Delhi', licenseNo:'PH-DL-5678' });
+        store.set('pharmacist_7766554433', { name:'Satyam singh', phone:'7766554433', shopName:'MediPlus Pharmacy', city:'Delhi', licenseNo:'PH-DL-5678' });
 
         store.set('records_9876543210', [
           { id:genId(), date:'2024-11-20', illness:'Hypertensive Episode', symptoms:'Headache, dizziness, BP 160/100', severity:'Moderate', prescription:'Amlodipine 5mg, Losartan 50mg',         notes:'Monitor BP twice daily. Reduce salt.',   followup:'2024-12-04', doctor:'Dr. Kavita Mehta', hospital:'Apollo Hospital', spec:'Cardiologist'       },
@@ -867,7 +867,7 @@
                 {!otpSent
                   ? <button className={`btn btn-full ${BTN[role]}`} onClick={sendOtp}>📱 Send OTP</button>
                   : <>
-                      <div className="otp-hint">OTP sent to <span>{phone}</span> · Use <span>123456</span> for demo</div>
+                      <div className="otp-hint">OTP sent to <span>{phone}</span> · Use <span>1234</span> for demo</div>
                       <OtpInput onComplete={verifyOtp} />
                     </>
                 }
@@ -2015,10 +2015,10 @@ Be concise, warm, helpful. Recommend consulting doctor for medical decisions.`;
             <h1 className="hero-title"><span className="line1">Your Medical</span><span className="line2">Passport</span></h1>
             <p className="hero-sub">One platform for patients, doctors, labs & pharmacists. AI-powered records, emergency access, prescription scanning and smart dispensing.</p>
             <div className="hero-btns">
-              <button className="cta cta-p" onClick={()=>onOpen('patient')}>👤 I'm a Patient</button>
-              <button className="cta cta-c" onClick={()=>onOpen('doctor')}>👨‍⚕️ I'm a Doctor</button>
-              <button className="cta cta-a" onClick={()=>onOpen('lab')}>🔬 I'm a Lab</button>
-              <button className="cta cta-l" onClick={()=>onOpen('pharmacist')}>💊 I'm a Pharmacist</button>
+              <button className="cta cta-p" onClick={()=>onOpen('patient')}>👤 Patient login</button>
+              <button className="cta cta-c" onClick={()=>onOpen('doctor')}>👨‍⚕️ Doctor login</button>
+              <button className="cta cta-a" onClick={()=>onOpen('lab')}>🔬 Laboratory login</button>
+              <button className="cta cta-l" onClick={()=>onOpen('pharmacist')}>💊 Pharmacist login</button>
             </div>
           </div>
           <div className="stats-bar">
