@@ -867,7 +867,7 @@
                 {!otpSent
                   ? <button className={`btn btn-full ${BTN[role]}`} onClick={sendOtp}>📱 Send OTP</button>
                   : <>
-                      <div className="otp-hint">OTP sent to <span>{phone}</span> · Use <span>1234</span> for demo</div>
+                      <div className="otp-hint">OTP sent to <span>{phone}</span> · Use <span>123456</span> for demo</div>
                       <OtpInput onComplete={verifyOtp} />
                     </>
                 }
